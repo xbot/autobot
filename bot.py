@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 # -*- coding: utf-8 -*-
 
 """
@@ -257,6 +257,11 @@ class RequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         pathInfo = urlparse.urlparse(self.path)
         command = pathInfo.path.strip(' /')
         params = urlparse.parse_qs(pathInfo.query, True)
+
+        # make connection
+
+        if command == 'connect':
+            return self._respond('ok')
 
         try:
             self.bot.do(command, params)
