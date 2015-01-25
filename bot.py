@@ -41,7 +41,7 @@ from SocketServer import ThreadingMixIn
 import RPi.GPIO as GPIO
 
 PORT = 8000  # Listening port
-PINS = (19, 21, 24, 26)  # GPIO pin numbers
+PINS = (12, 16, 18, 22)  # GPIO pin numbers
 
 
 class Bot(object):
@@ -198,17 +198,25 @@ class Bot(object):
     def setSpeed(self, speed, apply=False):
         """ Change the current speed.
 
-        :speed: float, speed percent.
+        :speed: string, speed percent or increment and decrement.
         :apply: bool, whether to apply the speed immediately
         :returns: void
 
         """
 
-        speed = float(speed)
-        if speed < 0 or speed > 100:
-            raise ValueError('Parameter \'speed\' should be an float number between 0 and 100.'
-                             )
-        self._speed = speed
+        if type(speed) == types.StringType and speed.startsWith(('-',
+                '+')):
+            tmp = speed[0] == '+' and self.getSpeed() + speed[1:] \
+                or self.getSpeed() - speed[1:]
+            if tmp >= 0 and tmp <= 100:
+                self._speed = tmp
+        else:
+            speed = float(speed)
+            if speed < 0 or speed > 100:
+                raise ValueError('Parameter \'speed\' should be an float number between 0 and 100.'
+                                 )
+            self._speed = speed
+
         if apply is True:
             self.do(self.getMotion())
 
