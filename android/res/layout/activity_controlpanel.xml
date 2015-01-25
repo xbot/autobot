@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>  
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"  
+    android:layout_width="fill_parent"  
+    android:layout_height="fill_parent" >  
+    <Button android:id="@+id/btnBackward"  
+        android:layout_width="100dp"  
+        android:layout_height="wrap_content"  
+        android:layout_centerInParent="true"  
+        android:layout_centerHorizontal="true"  
+        android:text="@string/btn_backward"  
+        ></Button>  
+    <Button android:id="@+id/btnLeft"  
+        android:layout_width="100dp"  
+        android:layout_height="wrap_content"  
+        android:layout_toStartOf="@id/btnBackward"
+        android:layout_toLeftOf="@id/btnBackward"  
+        android:layout_above="@id/btnBackward"  
+        android:text="@string/btn_left"  
+        ></Button>  
+    <Button android:id="@+id/btnRight"  
+        android:layout_width="100dp"  
+        android:layout_height="wrap_content"  
+        android:layout_toRightOf="@id/btnBackward"
+        android:layout_toEndOf="@id/btnBackward"  
+        android:layout_above="@id/btnBackward"  
+        android:text="@string/btn_right"  
+        ></Button>  
+    <Button android:id="@+id/btnForward"  
+        android:layout_width="100dp"  
+        android:layout_height="wrap_content"  
+        android:layout_toRightOf="@id/btnLeft"
+        android:layout_toEndOf="@id/btnLeft"  
+        android:layout_toLeftOf="@id/btnRight" 
+        android:layout_toStartOf="@id/btnRight" 
+        android:layout_above="@id/btnLeft"  
+        android:text="@string/btn_forward"  
+        ></Button>
+
+    <Button
+        android:id="@+id/btnStop"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btnForward"
+        android:layout_centerHorizontal="true"
+        android:text="@string/btn_stop" />
+
+    <Button
+        android:id="@+id/btnGearDown"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:text="@string/btn_geardown" />
+
+    <Button
+        android:id="@+id/btnGearUp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/btnGearDown"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:text="@string/btn_gearup" />
+  
+</RelativeLayout>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+    <!-- Titles -->
+    <string name="app_name">軒轅之鼓</string>
+    <string name="app_desc">4WD機器人遙控器</string>
+    <string name="app_author">淘氣</string>
+    <string name="about_title">4WD機器人遙控器</string>
+    <string name="about_content">版本：1.0\n發布：2015.01.25\n作者：淘氣\n電郵：donie.leigh@gmail.com</string>
+    <string name="label_about">關於</string>
+    <string name="menu_settings">設置</string>
+    <string name="msg_quit">再按一次退出應用</string>
+    <string name="app_connect">連接</string>
+    <string name="msg_emptyip">IP地址不能為空</string>
+    <string name="msg_emptyport">端口不能為空</string>
+    <string name="btn_forward">直行</string>
+    <string name="btn_backward">倒車</string>
+    <string name="btn_left">左轉</string>
+    <string name="btn_right">右轉</string>
+    <string name="btn_stop">停車</string>
+    <string name="btn_gearup">加速10%</string>
+    <string name="btn_geardown">減速10%</string>
+    <string name="hint_ipaddr">IP地址</string>
+    <string name="hint_port">端口</string>
+
+</resources>
