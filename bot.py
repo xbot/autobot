@@ -204,10 +204,10 @@ class Bot(object):
 
         """
 
-        if type(speed) == types.StringType and speed.startsWith(('-',
+        if type(speed) == types.StringType and speed.startswith(('-',
                 '+')):
-            tmp = speed[0] == '+' and self.getSpeed() + speed[1:] \
-                or self.getSpeed() - speed[1:]
+            tmp = speed[0] == '+' and self.getSpeed() + int(speed[1:]) \
+                or self.getSpeed() - int(speed[1:])
             if tmp >= 0 and tmp <= 100:
                 self._speed = tmp
         else:
@@ -278,16 +278,16 @@ class RequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
         return self._respond('ok')
 
-    def _respond(self, data='', code=0):
+    def _respond(self, msg='', code=0):
         """ Send response to the userside.
 
-        :data: string, response data.
+        :msg: string, response data.
         :code: int, status code, 0 for success, 1 for normal failure.
         :returns: void
 
         """
 
-        response = {'code': code, 'data': data}
+        response = {'code': code, 'msg': msg}
         self.send_response(200)
         self.end_headers()
         self.wfile.write(json.dumps(response))
