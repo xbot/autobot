@@ -5,13 +5,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.x3f.lib.RestClient;
+import org.x3f.lib.ToastUtil;
 
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 
 import android.app.Application;
 import android.content.res.Resources.NotFoundException;
-import android.widget.Toast;
 
 public class AutobotApplication extends Application {
 	public String ip;
@@ -36,7 +36,7 @@ public class AutobotApplication extends Application {
 	@Override  
     public void onCreate() {
         super.onCreate();  
-        setIp("192.168.1.104");
+        setIp("10.0.0.1");
         setPort("8000");
     }
 	
@@ -46,26 +46,28 @@ public class AutobotApplication extends Application {
             public void onSuccess(int statusCode, Header[] headers, JSONObject data) {
                 try {
                 	if (data.getInt("code") != 0) {
-						Toast.makeText(getApplicationContext(), data.getString("msg"), Toast.LENGTH_SHORT).show();
+                		ToastUtil.showToast(getApplicationContext(), data.getString("msg"));
+					} else {
+						ToastUtil.showToast(getApplicationContext(), getString(R.string.msg_currentspeed) + data.getString("msg") + "%");
 					}
 				} catch (NotFoundException e) {
-					Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+					ToastUtil.showToast(getApplicationContext(), e.getMessage());
 				} catch (JSONException e) {
-					Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+					ToastUtil.showToast(getApplicationContext(), e.getMessage());
 				}
             }
             
             @Override
             public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject error) {
-            	Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+            	ToastUtil.showToast(getApplicationContext(), e.getMessage());
             }
             @Override
             public void onFailure(int statusCode, Header[] headers, Throwable e, JSONArray error) {
-            	Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+            	ToastUtil.showToast(getApplicationContext(), e.getMessage());
             }
             @Override
             public void onFailure(int statusCode, Header[] headers, String error, Throwable e) {
-            	Toast.makeText(getApplicationContext(), error, Toast.LENGTH_SHORT).show();
+            	ToastUtil.showToast(getApplicationContext(), error);
             }
 		});
 	}

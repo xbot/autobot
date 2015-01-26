@@ -22,5 +22,6 @@
     <string name="btn_geardown">減速10%</string>
     <string name="hint_ipaddr">IP地址</string>
     <string name="hint_port">端口</string>
+    <string name="msg_currentspeed">当前速度</string>
 
 </resources>

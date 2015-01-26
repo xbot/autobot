@@ -55,3 +55,4 @@ target/
 
 android/bin
 android/gen
+*.swp

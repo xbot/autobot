@@ -14,10 +14,10 @@
             android:id="@+id/editIP"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="10dip"
             android:ems="10"
             android:hint="@string/hint_ipaddr"
-            android:inputType="numberDecimal"
-            android:layout_marginBottom="10dip" >
+            android:inputType="textUri" >
 
             <requestFocus />
         </EditText>
