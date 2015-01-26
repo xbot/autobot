@@ -217,7 +217,7 @@ class Bot(object):
                                  )
             self._speed = speed
 
-        if apply is True:
+        if apply is True and self.getMotion() is not None:
             self.do(self.getMotion())
 
     def getSpeed(self):
@@ -276,7 +276,7 @@ class RequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         except Exception, e:
             return self._respond(str(e), 1)
 
-        return self._respond('ok')
+        return self._respond(self.bot.getSpeed())
 
     def _respond(self, msg='', code=0):
         """ Send response to the userside.
