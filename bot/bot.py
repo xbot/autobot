@@ -88,15 +88,27 @@ class Bot(object):
 
         """
 
+        def GetParam(params, key, defaultValue=None):
+            """ Parse params and get the value of the key
+
+            :params: dict, parameters dict.
+            :key: string, parameter name.
+            :defaultValue: mixed, the default value.
+            :returns: string
+
+            """
+
+            return type(params) == types.DictType \
+                and params.has_key(key) and type(params[key]) \
+                == types.ListType and len(params[key]) > 0 \
+                and params[key][0] or defaultValue
+
         if type(command) != types.StringType:
             raise TypeError('Parameter \'command\' should be a string.')
         if type(params) != types.DictType and params is not None:
             raise TypeError('Parameter \'params\' should be a dict.')
 
-        speed = type(params) == types.DictType \
-            and params.has_key('speed') and type(params['speed']) \
-            == types.ListType and len(params['speed']) > 0 \
-            and params['speed'][0] or None
+        speed = GetParam(params, 'speed', None)
         if command == 'forward':
             self.forward(speed)
         elif command == 'backward':
@@ -106,7 +118,8 @@ class Bot(object):
         elif command == 'right':
             self.turnRight(speed)
         elif command == 'stop':
-            self.stop()
+            holdSpeed = GetParam(params, 'hold', '0')
+            self.stop(holdSpeed == '1')
         elif command == 'vary':
             self.setSpeed(speed, True)
         else:
@@ -120,8 +133,9 @@ class Bot(object):
 
         """
 
-        if speed is not None:
-            self.setSpeed(speed)
+        if speed is None or float(speed) <= 0:
+            speed = 20
+        self.setSpeed(speed)
         speed = self.getSpeed()
         self.setMotion('forward')
         self.mtrL1.ChangeDutyCycle(speed)
@@ -137,8 +151,9 @@ class Bot(object):
 
         """
 
-        if speed is not None:
-            self.setSpeed(speed)
+        if speed is None or float(speed) <= 0:
+            speed = 20
+        self.setSpeed(speed)
         speed = self.getSpeed()
         self.setMotion('backward')
         self.mtrL1.ChangeDutyCycle(0)
@@ -154,8 +169,9 @@ class Bot(object):
 
         """
 
-        if speed is not None:
-            self.setSpeed(speed)
+        if speed is None or float(speed) <= 0:
+            speed = 20
+        self.setSpeed(speed)
         speed = self.getSpeed()
         self.setMotion('left')
         self.mtrL1.ChangeDutyCycle(0)
@@ -171,8 +187,9 @@ class Bot(object):
 
         """
 
-        if speed is not None:
-            self.setSpeed(speed)
+        if speed is None or float(speed) <= 0:
+            speed = 20
+        self.setSpeed(speed)
         speed = self.getSpeed()
         self.setMotion('right')
         self.mtrL1.ChangeDutyCycle(speed)
@@ -180,15 +197,17 @@ class Bot(object):
         self.mtrR1.ChangeDutyCycle(0)
         self.mtrR2.ChangeDutyCycle(speed)
 
-    def stop(self):
+    def stop(self, holdSpeed=False):
         """ Stop moving.
 
+        :holdSpeed: boolean, True to stop when holding the speed.
         :speed: float, speed percent, 0~100
         :returns: void
 
         """
 
-        self.setSpeed(0)
+        if holdSpeed is False:
+            self.setSpeed(0)
         self.setMotion(None)
         self.mtrL1.ChangeDutyCycle(0)
         self.mtrL2.ChangeDutyCycle(0)
