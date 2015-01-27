@@ -133,9 +133,11 @@ class Bot(object):
 
         """
 
-        if speed is None or float(speed) <= 0:
+        if (speed is None or float(speed) <= 0) \
+            and (self.getSpeed() is None or self.getSpeed() <= 0):
             speed = 20
-        self.setSpeed(speed)
+        if speed is not None:
+            self.setSpeed(speed)
         speed = self.getSpeed()
         self.setMotion('forward')
         self.mtrL1.ChangeDutyCycle(speed)
@@ -151,9 +153,11 @@ class Bot(object):
 
         """
 
-        if speed is None or float(speed) <= 0:
+        if (speed is None or float(speed) <= 0) \
+            and (self.getSpeed() is None or self.getSpeed() <= 0):
             speed = 20
-        self.setSpeed(speed)
+        if speed is not None:
+            self.setSpeed(speed)
         speed = self.getSpeed()
         self.setMotion('backward')
         self.mtrL1.ChangeDutyCycle(0)
@@ -169,9 +173,11 @@ class Bot(object):
 
         """
 
-        if speed is None or float(speed) <= 0:
+        if (speed is None or float(speed) <= 0) \
+            and (self.getSpeed() is None or self.getSpeed() <= 0):
             speed = 20
-        self.setSpeed(speed)
+        if speed is not None:
+            self.setSpeed(speed)
         speed = self.getSpeed()
         self.setMotion('left')
         self.mtrL1.ChangeDutyCycle(0)
@@ -187,9 +193,11 @@ class Bot(object):
 
         """
 
-        if speed is None or float(speed) <= 0:
+        if (speed is None or float(speed) <= 0) \
+            and (self.getSpeed() is None or self.getSpeed() <= 0):
             speed = 20
-        self.setSpeed(speed)
+        if speed is not None:
+            self.setSpeed(speed)
         speed = self.getSpeed()
         self.setMotion('right')
         self.mtrL1.ChangeDutyCycle(speed)
@@ -223,6 +231,7 @@ class Bot(object):
 
         """
 
+        print speed, type(speed)
         if type(speed) == types.StringType and speed.startswith(('-',
                 '+')):
             tmp = speed[0] == '+' and self.getSpeed() + int(speed[1:]) \
