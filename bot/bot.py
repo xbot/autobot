@@ -133,8 +133,8 @@ class Bot(object):
 
         """
 
-        if (speed is None or float(speed) <= 0) \
-            and (self.getSpeed() is None or self.getSpeed() <= 0):
+        if (speed is None or float(speed) <= 0) and (self.getSpeed()
+                is None or self.getSpeed() <= 0):
             speed = 20
         if speed is not None:
             self.setSpeed(speed)
@@ -153,8 +153,8 @@ class Bot(object):
 
         """
 
-        if (speed is None or float(speed) <= 0) \
-            and (self.getSpeed() is None or self.getSpeed() <= 0):
+        if (speed is None or float(speed) <= 0) and (self.getSpeed()
+                is None or self.getSpeed() <= 0):
             speed = 20
         if speed is not None:
             self.setSpeed(speed)
@@ -173,8 +173,8 @@ class Bot(object):
 
         """
 
-        if (speed is None or float(speed) <= 0) \
-            and (self.getSpeed() is None or self.getSpeed() <= 0):
+        if (speed is None or float(speed) <= 0) and (self.getSpeed()
+                is None or self.getSpeed() <= 0):
             speed = 20
         if speed is not None:
             self.setSpeed(speed)
@@ -193,8 +193,8 @@ class Bot(object):
 
         """
 
-        if (speed is None or float(speed) <= 0) \
-            and (self.getSpeed() is None or self.getSpeed() <= 0):
+        if (speed is None or float(speed) <= 0) and (self.getSpeed()
+                is None or self.getSpeed() <= 0):
             speed = 20
         if speed is not None:
             self.setSpeed(speed)
@@ -231,7 +231,6 @@ class Bot(object):
 
         """
 
-        print speed, type(speed)
         if type(speed) == types.StringType and speed.startswith(('-',
                 '+')):
             tmp = speed[0] == '+' and self.getSpeed() + int(speed[1:]) \
