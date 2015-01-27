@@ -3,11 +3,13 @@ package org.x3f.autobot;
 import com.loopj.android.http.RequestParams;
 
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.app.Activity;
 
-public class ControlActivity extends Activity implements OnClickListener {
+public class ControlActivity extends Activity implements OnClickListener, OnTouchListener {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -19,9 +21,9 @@ public class ControlActivity extends Activity implements OnClickListener {
 		View btnBackward = this.findViewById(R.id.btnBackward);
 		btnBackward.setOnClickListener(this);
 		View btnLeft = this.findViewById(R.id.btnLeft);
-		btnLeft.setOnClickListener(this);
+		btnLeft.setOnTouchListener(this);;
 		View btnRight = this.findViewById(R.id.btnRight);
-		btnRight.setOnClickListener(this);
+		btnRight.setOnTouchListener(this);
 		View btnStop = this.findViewById(R.id.btnStop);
 		btnStop.setOnClickListener(this);
 		View btnGearUp = this.findViewById(R.id.btnGearUp);
@@ -52,16 +54,45 @@ public class ControlActivity extends Activity implements OnClickListener {
 			app.call("stop", null);
 			break;
 		case R.id.btnGearUp:
-			params.add("speed", "+10");
+			params.add("speed", "+20");
 			app.call("vary", params);
 			break;
 		case R.id.btnGearDown:
-			params.add("speed", "-10");
+			params.add("speed", "-20");
 			app.call("vary", params);
 			break;
 		default:
 			break;
 		}
+	}
+
+	@Override
+	public boolean onTouch(View v, MotionEvent event) {
+		AutobotApplication app = (AutobotApplication)getApplication();
+		RequestParams params = new RequestParams();
+		switch (v.getId()) {
+		case R.id.btnLeft:
+			if (event.getAction() == MotionEvent.ACTION_DOWN) {
+				app.call("left", params);
+			}
+			if (event.getAction() == MotionEvent.ACTION_UP) {
+				params.add("hold", "1");
+				app.call("stop", params);
+			}
+			break;
+		case R.id.btnRight:
+			if (event.getAction() == MotionEvent.ACTION_DOWN) {
+				app.call("right", params);
+			}
+			if (event.getAction() == MotionEvent.ACTION_UP) {
+				params.add("hold", "1");
+				app.call("stop", params);
+			}
+			break;
+		default:
+			break;
+		}
+		return false;
 	}
 
 }
