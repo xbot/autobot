@@ -51,7 +51,8 @@ public class ControlActivity extends Activity implements OnClickListener, OnTouc
 			app.call("right", null);
 			break;
 		case R.id.btnStop:
-			app.call("stop", null);
+			params.add("hold", "1");
+			app.call("stop", params);
 			break;
 		case R.id.btnGearUp:
 			params.add("speed", "+20");
