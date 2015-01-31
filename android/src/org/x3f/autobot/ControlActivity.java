@@ -21,9 +21,13 @@ public class ControlActivity extends Activity implements OnClickListener, OnTouc
 		View btnBackward = this.findViewById(R.id.btnBackward);
 		btnBackward.setOnClickListener(this);
 		View btnLeft = this.findViewById(R.id.btnLeft);
-		btnLeft.setOnTouchListener(this);;
+		btnLeft.setOnTouchListener(this);
 		View btnRight = this.findViewById(R.id.btnRight);
 		btnRight.setOnTouchListener(this);
+		View btnAdjLeft = this.findViewById(R.id.btnAdjLeft);
+		btnAdjLeft.setOnTouchListener(this);
+		View btnAdjRight = this.findViewById(R.id.btnAdjRight);
+		btnAdjRight.setOnTouchListener(this);
 		View btnStop = this.findViewById(R.id.btnStop);
 		btnStop.setOnClickListener(this);
 		View btnGearUp = this.findViewById(R.id.btnGearUp);
@@ -43,12 +47,6 @@ public class ControlActivity extends Activity implements OnClickListener, OnTouc
 			break;
 		case R.id.btnBackward:
 			app.call("backward", null);
-			break;
-		case R.id.btnLeft:
-			app.call("left", null);
-			break;
-		case R.id.btnRight:
-			app.call("right", null);
 			break;
 		case R.id.btnStop:
 			params.add("hold", "1");
@@ -88,6 +86,22 @@ public class ControlActivity extends Activity implements OnClickListener, OnTouc
 			if (event.getAction() == MotionEvent.ACTION_UP) {
 				params.add("hold", "1");
 				app.call("stop", params);
+			}
+			break;
+		case R.id.btnAdjLeft:
+			if (event.getAction() == MotionEvent.ACTION_DOWN) {
+				app.call("adjustLeft", params);
+			}
+			if (event.getAction() == MotionEvent.ACTION_UP) {
+				app.call("resume", params);
+			}
+			break;
+		case R.id.btnAdjRight:
+			if (event.getAction() == MotionEvent.ACTION_DOWN) {
+				app.call("adjustRight", params);
+			}
+			if (event.getAction() == MotionEvent.ACTION_UP) {
+				app.call("resume", params);
 			}
 			break;
 		default:

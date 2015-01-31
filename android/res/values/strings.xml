@@ -17,6 +17,8 @@
     <string name="btn_backward">倒車</string>
     <string name="btn_left">左轉</string>
     <string name="btn_right">右轉</string>
+    <string name="btn_adjleft">左拐</string>
+    <string name="btn_adjright">右拐</string>
     <string name="btn_stop">停車</string>
     <string name="btn_gearup">加速20%</string>
     <string name="btn_geardown">減速20%</string>

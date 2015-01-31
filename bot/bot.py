@@ -33,7 +33,6 @@ Description: 4WD autobot spirit.
 """
 
 import BaseHTTPServer
-import threading
 import urlparse
 import types
 import json
@@ -122,6 +121,13 @@ class Bot(object):
             self.stop(holdSpeed == '1')
         elif command == 'vary':
             self.setSpeed(speed, True)
+        elif command == 'adjustLeft':
+            self.adjustLeft()
+        elif command == 'adjustRight':
+            self.adjustRight()
+        elif command == 'resume':
+            if ['forward', 'backward'].count(self.getMotion()) > 0:
+                self.do(self.getMotion())
         else:
             raise Exception('Unknown command ' + command)
 
@@ -204,6 +210,48 @@ class Bot(object):
         self.mtrL2.ChangeDutyCycle(0)
         self.mtrR1.ChangeDutyCycle(0)
         self.mtrR2.ChangeDutyCycle(speed)
+
+    def adjustLeft(self):
+        """ Turn left a little bit.
+
+        :returns: void
+
+        """
+
+        speed = self.getSpeed()
+        if speed >= 20:
+            tmpSpeed = speed - 20
+            if self.getMotion() == 'forward':
+                self.mtrL1.ChangeDutyCycle(tmpSpeed)
+                self.mtrL2.ChangeDutyCycle(0)
+                self.mtrR1.ChangeDutyCycle(speed)
+                self.mtrR2.ChangeDutyCycle(0)
+            elif self.getMotion() == 'backward':
+                self.mtrL1.ChangeDutyCycle(0)
+                self.mtrL2.ChangeDutyCycle(tmpSpeed)
+                self.mtrR1.ChangeDutyCycle(0)
+                self.mtrR2.ChangeDutyCycle(speed)
+
+    def adjustRight(self):
+        """ Turn right a little bit.
+
+        :returns: void
+
+        """
+
+        speed = self.getSpeed()
+        if speed >= 20:
+            tmpSpeed = speed - 20
+            if self.getMotion() == 'forward':
+                self.mtrL1.ChangeDutyCycle(speed)
+                self.mtrL2.ChangeDutyCycle(0)
+                self.mtrR1.ChangeDutyCycle(tmpSpeed)
+                self.mtrR2.ChangeDutyCycle(0)
+            elif self.getMotion() == 'backward':
+                self.mtrL1.ChangeDutyCycle(0)
+                self.mtrL2.ChangeDutyCycle(speed)
+                self.mtrR1.ChangeDutyCycle(0)
+                self.mtrR2.ChangeDutyCycle(tmpSpeed)
 
     def stop(self, holdSpeed=False):
         """ Stop moving.
