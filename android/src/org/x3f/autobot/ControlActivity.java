@@ -32,7 +32,7 @@ public class ControlActivity extends Activity implements OnClickListener, OnTouc
 
     private MjpegView videoView = null;
     
-    private boolean suspending = false;
+    private static boolean suspending = false;
     
 	final Handler handler = new Handler();
 	
@@ -172,7 +172,6 @@ public class ControlActivity extends Activity implements OnClickListener, OnTouc
         		suspending = false;
         	}
         }
-
     }
 
     public void onStart() {
@@ -200,7 +199,7 @@ public class ControlActivity extends Activity implements OnClickListener, OnTouc
     	
         super.onDestroy();
     }
-
+    
     public void setImageError(){
     	handler.post(new Runnable() {
     		@Override
