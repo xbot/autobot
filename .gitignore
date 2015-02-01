@@ -46,3 +46,4 @@ target/
 android/bin
 android/gen
 *.swp
+nohup.out
