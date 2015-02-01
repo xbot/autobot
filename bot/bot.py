@@ -38,6 +38,7 @@ import types
 import json
 from SocketServer import ThreadingMixIn
 import RPi.GPIO as GPIO
+import os
 
 PORT = 8000  # Listening port
 PINS = (12, 16, 18, 22)  # GPIO pin numbers
@@ -128,6 +129,11 @@ class Bot(object):
         elif command == 'resume':
             if ['forward', 'backward'].count(self.getMotion()) > 0:
                 self.do(self.getMotion())
+        elif command == 'videoOn':
+            currentPath = os.path.split(os.path.realpath(__file__))[0]
+            os.system('nohup ' + currentPath + '/video.sh > /dev/null 2>&1 &')
+        elif command == 'videoOff':
+            os.system('pkill mjpg_streamer')
         else:
             raise Exception('Unknown command ' + command)
 
@@ -219,18 +225,17 @@ class Bot(object):
         """
 
         speed = self.getSpeed()
-        if speed >= 20:
-            tmpSpeed = speed - 20
-            if self.getMotion() == 'forward':
-                self.mtrL1.ChangeDutyCycle(tmpSpeed)
-                self.mtrL2.ChangeDutyCycle(0)
-                self.mtrR1.ChangeDutyCycle(speed)
-                self.mtrR2.ChangeDutyCycle(0)
-            elif self.getMotion() == 'backward':
-                self.mtrL1.ChangeDutyCycle(0)
-                self.mtrL2.ChangeDutyCycle(tmpSpeed)
-                self.mtrR1.ChangeDutyCycle(0)
-                self.mtrR2.ChangeDutyCycle(speed)
+        tmpSpeed = speed >= 40 and speed - 40 or 0
+        if self.getMotion() == 'forward':
+            self.mtrL1.ChangeDutyCycle(tmpSpeed)
+            self.mtrL2.ChangeDutyCycle(0)
+            self.mtrR1.ChangeDutyCycle(speed)
+            self.mtrR2.ChangeDutyCycle(0)
+        elif self.getMotion() == 'backward':
+            self.mtrL1.ChangeDutyCycle(0)
+            self.mtrL2.ChangeDutyCycle(tmpSpeed)
+            self.mtrR1.ChangeDutyCycle(0)
+            self.mtrR2.ChangeDutyCycle(speed)
 
     def adjustRight(self):
         """ Turn right a little bit.
@@ -240,18 +245,17 @@ class Bot(object):
         """
 
         speed = self.getSpeed()
-        if speed >= 20:
-            tmpSpeed = speed - 20
-            if self.getMotion() == 'forward':
-                self.mtrL1.ChangeDutyCycle(speed)
-                self.mtrL2.ChangeDutyCycle(0)
-                self.mtrR1.ChangeDutyCycle(tmpSpeed)
-                self.mtrR2.ChangeDutyCycle(0)
-            elif self.getMotion() == 'backward':
-                self.mtrL1.ChangeDutyCycle(0)
-                self.mtrL2.ChangeDutyCycle(speed)
-                self.mtrR1.ChangeDutyCycle(0)
-                self.mtrR2.ChangeDutyCycle(tmpSpeed)
+        tmpSpeed = speed >= 40 and speed - 40 or 0
+        if self.getMotion() == 'forward':
+            self.mtrL1.ChangeDutyCycle(speed)
+            self.mtrL2.ChangeDutyCycle(0)
+            self.mtrR1.ChangeDutyCycle(tmpSpeed)
+            self.mtrR2.ChangeDutyCycle(0)
+        elif self.getMotion() == 'backward':
+            self.mtrL1.ChangeDutyCycle(0)
+            self.mtrL2.ChangeDutyCycle(speed)
+            self.mtrR1.ChangeDutyCycle(0)
+            self.mtrR2.ChangeDutyCycle(tmpSpeed)
 
     def stop(self, holdSpeed=False):
         """ Stop moving.

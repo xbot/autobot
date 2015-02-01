@@ -43,3 +43,4 @@ target/
 android/bin
 *.swp
 obj/
+nohup.out
