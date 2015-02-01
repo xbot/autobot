@@ -61,40 +61,37 @@ public final class R {
         public static final int activity_splash=0x7f070002;
     }
     public static final class string {
-        public static final int about_content=0x7f050004;
+        public static final int about_content=0x7f050005;
         public static final int about_title=0x7f050003;
-        public static final int action_settings=0x7f050019;
         public static final int app_author=0x7f050002;
-        public static final int app_connect=0x7f050008;
+        public static final int app_connect=0x7f050009;
         public static final int app_desc=0x7f050001;
         /**  Titles 
          */
         public static final int app_name=0x7f050000;
-        public static final int btn_adjleft=0x7f05000f;
-        public static final int btn_adjright=0x7f050010;
-        public static final int btn_backward=0x7f05000c;
-        public static final int btn_disablevideo=0x7f05001f;
-        public static final int btn_enablevideo=0x7f05001e;
-        public static final int btn_forward=0x7f05000b;
-        public static final int btn_geardown=0x7f050013;
-        public static final int btn_gearup=0x7f050012;
-        public static final int btn_left=0x7f05000d;
-        public static final int btn_right=0x7f05000e;
-        public static final int btn_stop=0x7f050011;
-        public static final int hello_world=0x7f050018;
-        public static final int hint_ipaddr=0x7f050014;
-        public static final int hint_port=0x7f050015;
-        public static final int label_about=0x7f050005;
-        public static final int menu_settings=0x7f050006;
-        public static final int msg_connected=0x7f05001b;
-        public static final int msg_connectionfailed=0x7f05001c;
-        public static final int msg_currentspeed=0x7f050016;
-        public static final int msg_emptyip=0x7f050009;
-        public static final int msg_emptyport=0x7f05000a;
-        public static final int msg_quit=0x7f050007;
-        public static final int settings=0x7f05001a;
-        public static final int title_activity_video=0x7f050017;
-        public static final int title_imageerror=0x7f05001d;
+        public static final int app_version=0x7f050004;
+        public static final int btn_adjleft=0x7f050010;
+        public static final int btn_adjright=0x7f050011;
+        public static final int btn_backward=0x7f05000d;
+        public static final int btn_disablevideo=0x7f05001c;
+        public static final int btn_enablevideo=0x7f05001b;
+        public static final int btn_forward=0x7f05000c;
+        public static final int btn_geardown=0x7f050014;
+        public static final int btn_gearup=0x7f050013;
+        public static final int btn_left=0x7f05000e;
+        public static final int btn_right=0x7f05000f;
+        public static final int btn_stop=0x7f050012;
+        public static final int hint_ipaddr=0x7f050015;
+        public static final int hint_port=0x7f050016;
+        public static final int label_about=0x7f050006;
+        public static final int menu_settings=0x7f050007;
+        public static final int msg_connected=0x7f050018;
+        public static final int msg_connectionfailed=0x7f050019;
+        public static final int msg_currentspeed=0x7f050017;
+        public static final int msg_emptyip=0x7f05000a;
+        public static final int msg_emptyport=0x7f05000b;
+        public static final int msg_quit=0x7f050008;
+        public static final int title_imageerror=0x7f05001a;
     }
     public static final class style {
         /** 

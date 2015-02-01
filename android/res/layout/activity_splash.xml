@@ -39,7 +39,7 @@
                 android:layout_height="fill_parent"
                 android:gravity="bottom"
                 android:paddingBottom="6dip"
-                android:text="v1.0"
+                android:text="@string/app_version"
                 android:textStyle="bold"
                 android:textSize="16sp" />
         </LinearLayout>
@@ -79,7 +79,7 @@
             android:id="@+id/copyright_product"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="出品"
+            android:text="一下"
             android:textSize="11sp" />
     </LinearLayout>
 
