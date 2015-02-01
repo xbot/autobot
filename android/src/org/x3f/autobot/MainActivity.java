@@ -6,7 +6,6 @@ import com.loopj.android.http.*;
 
 import org.json.*;
 import org.apache.http.Header;
-
 import android.content.Intent;
 import android.content.res.Resources.NotFoundException;
 import android.os.Bundle;

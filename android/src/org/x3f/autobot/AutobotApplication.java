@@ -14,8 +14,9 @@ import android.app.Application;
 import android.content.res.Resources.NotFoundException;
 
 public class AutobotApplication extends Application {
-	public String ip;
-	public String port;
+	private String ip;
+	private String port;
+	private String videoPort = "8080";
 	
 	public String getIp() {
 		return ip;
@@ -31,6 +32,14 @@ public class AutobotApplication extends Application {
 
 	public void setPort(String port) {
 		this.port = port;
+	}
+	
+	public String getVideoPort() {
+		return videoPort;
+	}
+
+	public void setVideoPort(String port) {
+		this.videoPort = port;
 	}
 
 	@Override  
@@ -70,5 +79,9 @@ public class AutobotApplication extends Application {
             	ToastUtil.showToast(getApplicationContext(), error);
             }
 		});
+	}
+	
+	public String getVideoURL() {
+		return "http://"+this.getIp()+":"+this.getVideoPort()+"/?action=stream";
 	}
 }

@@ -25,5 +25,16 @@
     <string name="hint_ipaddr">IP地址</string>
     <string name="hint_port">端口</string>
     <string name="msg_currentspeed">当前速度</string>
+    <string name="title_activity_video">VideoActivity</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    
+    <string name="settings">Settings</string>
+	
+	<string name="msg_connected">连接已建立</string>
+	<string name="msg_connectionfailed">连接失败</string>
+	<string name="title_imageerror">Error on preparing images</string>
+	<string name="btn_enablevideo">监控</string>
+	<string name="btn_disablevideo">关闭</string>
 
 </resources>

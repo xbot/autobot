@@ -1,81 +1,102 @@
-<?xml version="1.0" encoding="utf-8"?>  
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"  
-    android:layout_width="fill_parent"  
-    android:layout_height="fill_parent" >  
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+    <org.x3f.autobot.MjpegView
+		android:id="@+id/mv"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        />
     
-    <Button android:id="@+id/btnBackward"  
-        android:layout_width="100dp"  
-        android:layout_height="wrap_content"  
-        android:layout_centerInParent="true"  
-        android:layout_centerHorizontal="true"  
-        android:text="@string/btn_backward" />
-      
-    <Button android:id="@+id/btnLeft"  
-        android:layout_width="100dp"  
-        android:layout_height="wrap_content"  
-        android:layout_toStartOf="@id/btnBackward"
-        android:layout_toLeftOf="@id/btnBackward"  
-        android:layout_below="@id/btnBackward"  
-        android:text="@string/btn_left" />
-    
-    <Button android:id="@+id/btnRight"  
-        android:layout_width="100dp"  
-        android:layout_height="wrap_content"  
-        android:layout_toRightOf="@id/btnBackward"
-        android:layout_toEndOf="@id/btnBackward"  
-        android:layout_below="@id/btnBackward"  
-        android:text="@string/btn_right" />
-    
-    <Button android:id="@+id/btnAdjLeft"  
-        android:layout_width="100dp"  
-        android:layout_height="wrap_content"  
-        android:layout_toStartOf="@id/btnBackward"
-        android:layout_toLeftOf="@id/btnBackward"  
-        android:layout_above="@id/btnBackward"  
-        android:text="@string/btn_adjleft" />
-    
-    <Button android:id="@+id/btnAdjRight"  
-        android:layout_width="100dp"  
-        android:layout_height="wrap_content"  
-        android:layout_toRightOf="@id/btnBackward"
-        android:layout_toEndOf="@id/btnBackward"  
-        android:layout_above="@id/btnBackward"  
-        android:text="@string/btn_adjright" />
-    
-    <Button android:id="@+id/btnForward"  
-        android:layout_width="100dp"  
-        android:layout_height="wrap_content"  
-        android:layout_toRightOf="@id/btnAdjLeft"
-        android:layout_toEndOf="@id/btnAdjLeft"  
-        android:layout_toLeftOf="@id/btnAdjRight" 
-        android:layout_toStartOf="@id/btnAdjRight" 
-        android:layout_above="@id/btnAdjLeft"  
-        android:text="@string/btn_forward" />
+    <RelativeLayout  
+	    android:layout_width="fill_parent"  
+	    android:layout_height="fill_parent" >  
+	    
+	    <Button android:id="@+id/btnBackward"  
+	        android:layout_width="100dp"  
+	        android:layout_height="wrap_content"  
+	        android:layout_centerInParent="true"  
+	        android:layout_centerHorizontal="true"  
+	        android:text="@string/btn_backward" />
+	      
+	    <Button android:id="@+id/btnLeft"  
+	        android:layout_width="100dp"  
+	        android:layout_height="wrap_content"  
+	        android:layout_toStartOf="@id/btnBackward"
+	        android:layout_toLeftOf="@id/btnBackward"  
+	        android:layout_below="@id/btnBackward"  
+	        android:text="@string/btn_left" />
+	    
+	    <Button android:id="@+id/btnRight"  
+	        android:layout_width="100dp"  
+	        android:layout_height="wrap_content"  
+	        android:layout_toRightOf="@id/btnBackward"
+	        android:layout_toEndOf="@id/btnBackward"  
+	        android:layout_below="@id/btnBackward"  
+	        android:text="@string/btn_right" />
+	    
+	    <Button android:id="@+id/btnAdjLeft"  
+	        android:layout_width="100dp"  
+	        android:layout_height="wrap_content"  
+	        android:layout_toStartOf="@id/btnBackward"
+	        android:layout_toLeftOf="@id/btnBackward"  
+	        android:layout_above="@id/btnBackward"  
+	        android:text="@string/btn_adjleft" />
+	    
+	    <Button android:id="@+id/btnAdjRight"  
+	        android:layout_width="100dp"  
+	        android:layout_height="wrap_content"  
+	        android:layout_toRightOf="@id/btnBackward"
+	        android:layout_toEndOf="@id/btnBackward"  
+	        android:layout_above="@id/btnBackward"  
+	        android:text="@string/btn_adjright" />
+	    
+	    <Button android:id="@+id/btnForward"  
+	        android:layout_width="100dp"  
+	        android:layout_height="wrap_content"  
+	        android:layout_toRightOf="@id/btnAdjLeft"
+	        android:layout_toEndOf="@id/btnAdjLeft"  
+	        android:layout_toLeftOf="@id/btnAdjRight" 
+	        android:layout_toStartOf="@id/btnAdjRight" 
+	        android:layout_above="@id/btnAdjLeft"  
+	        android:text="@string/btn_forward" />
+	
+	    <Button
+	        android:id="@+id/btnStop"
+	        android:layout_width="100dp"
+	        android:layout_height="wrap_content"
+	        android:layout_below="@+id/btnForward"
+	        android:layout_centerHorizontal="true"
+	        android:text="@string/btn_stop" />
+	
+	    <Button
+	        android:id="@+id/btnGearDown"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_alignParentBottom="true"
+	        android:layout_alignParentRight="true"
+	        android:layout_alignParentEnd="true"
+	        android:text="@string/btn_geardown" />
+	
+	    <Button
+	        android:id="@+id/btnGearUp"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_above="@+id/btnGearDown"
+	        android:layout_alignParentRight="true"
+	        android:layout_alignParentEnd="true"
+	        android:text="@string/btn_gearup" />
 
-    <Button
-        android:id="@+id/btnStop"
-        android:layout_width="100dp"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/btnForward"
-        android:layout_centerHorizontal="true"
-        android:text="@string/btn_stop" />
-
-    <Button
-        android:id="@+id/btnGearDown"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:text="@string/btn_geardown" />
-
-    <Button
-        android:id="@+id/btnGearUp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/btnGearDown"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:text="@string/btn_gearup" />
-  
-</RelativeLayout>
+	    <ToggleButton
+	        android:id="@+id/btnToggleVideo"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_alignParentLeft="true"
+	        android:layout_alignTop="@+id/btnGearDown"
+	        android:textOn="@string/btn_disablevideo"
+	        android:textOff="@string/btn_enablevideo" />
+	  
+	</RelativeLayout>
+</FrameLayout>
