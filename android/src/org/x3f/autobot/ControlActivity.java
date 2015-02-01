@@ -64,7 +64,7 @@ public class ControlActivity extends Activity implements OnClickListener, OnTouc
 		
 		videoView = (MjpegView) findViewById(R.id.mv);  
         if(videoView != null){
-        	videoView.setResolution(320, 240);
+        	videoView.setResolution(160, 120);
         }
 	}
 
