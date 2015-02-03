@@ -27,6 +27,7 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 	private EditText editIP;
 	private EditText editPort;
 	private EditText editVideoPort;
+	private EditText editFps;
 	private Spinner spinRslv;
 	private ArrayAdapter<?> spinRslvAdp;
 
@@ -49,6 +50,8 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 		spinRslvAdp = ArrayAdapter.createFromResource(this, R.array.resolutions, android.R.layout.simple_spinner_item);  
 		spinRslvAdp.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);  
 		spinRslv.setAdapter(spinRslvAdp);
+		editFps = (EditText) this.findViewById(R.id.editFps);
+		editFps.setText(app.getVideoFps());
 	}
 
 	@Override
@@ -111,6 +114,12 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 			int pos = spinRslv.getSelectedItemPosition();
 			String[] resolutions = getResources().getStringArray(R.array.resolutions);
 			app.setVideoResolution(resolutions[pos]);
+			// Fetch video fps
+			if (editFps.getText().length()<=0) {
+				Toast.makeText(getApplicationContext(), this.getString(R.string.msg_emptyvideofps), Toast.LENGTH_SHORT).show();
+				break;
+			}
+			app.setVideoFps(editFps.getText().toString());
 			
 			// Test connection.
 			RestClient.get("http://" + editIP.getText() + ":" + editPort.getText() + "/connect", null, new JsonHttpResponseHandler() {

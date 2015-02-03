@@ -43,7 +43,16 @@
         <Spinner
             android:id="@+id/spinRslv"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dip" />
+
+        <EditText
+            android:id="@+id/editFps"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="number"
+            android:layout_marginBottom="10dip" />
 
         <Button
             android:id="@+id/btnConnect"

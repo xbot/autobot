@@ -62,7 +62,11 @@ public class ControlActivity extends Activity implements OnClickListener, OnTouc
 		
 		videoView = (MjpegView) findViewById(R.id.mv);  
         if(videoView != null){
-        	videoView.setResolution(160, 120);
+        	AutobotApplication app = (AutobotApplication)getApplication();
+        	String[] resolution = app.getVideoResolution().split("x");
+        	int width = Integer.parseInt(resolution[0]);
+        	int height = Integer.parseInt(resolution[1]);
+        	videoView.setResolution(width, height);
         }
 	}
 
@@ -95,6 +99,8 @@ public class ControlActivity extends Activity implements OnClickListener, OnTouc
 			if (btn.isChecked()) {
 				// enable video
 				videoView.setBackgroundColor(Color.TRANSPARENT);
+				params.add("resolution", app.getVideoResolution());
+				params.add("fps", app.getVideoFps());
 				app.call("videoOn", params);
 				try {
 					Thread.sleep(1000);

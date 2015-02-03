@@ -18,6 +18,7 @@ public class AutobotApplication extends Application {
 	private String port;
 	private String videoPort;
 	private String videoResolution;
+	private String videoFps;
 	
 	public String getIp() {
 		return ip;
@@ -51,6 +52,14 @@ public class AutobotApplication extends Application {
 		this.videoResolution = videoResolution;
 	}
 
+	public String getVideoFps() {
+		return videoFps;
+	}
+
+	public void setVideoFps(String videoFps) {
+		this.videoFps = videoFps;
+	}
+
 	@Override  
     public void onCreate() {
         super.onCreate();  
@@ -58,6 +67,7 @@ public class AutobotApplication extends Application {
         setPort("8000");
         setVideoPort("8080");
         setVideoResolution("160x120");
+        setVideoFps("30");
     }
 	
 	public void call(String command, RequestParams params) {

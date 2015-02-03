@@ -15,6 +15,7 @@
     <string name="msg_emptyip">IP地址不能為空</string>
     <string name="msg_emptyport">端口不能為空</string>
     <string name="msg_emptyvideoport">視頻服務端口不能為空</string>
+    <string name="msg_emptyvideofps">視頻幀數不能為空</string>
     <string name="btn_forward">直行</string>
     <string name="btn_backward">倒車</string>
     <string name="btn_left">左轉</string>

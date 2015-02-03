@@ -131,7 +131,13 @@ class Bot(object):
                 self.do(self.getMotion())
         elif command == 'videoOn':
             currentPath = os.path.split(os.path.realpath(__file__))[0]
-            os.system('nohup ' + currentPath + '/video.sh > /dev/null 2>&1 &')
+            resolution = GetParam(params, 'resolution')
+            fps = GetParam(params, 'fps')
+            options = resolution is not None and ' -r ' + resolution \
+                or ''
+            options = options + (fps is not None and ' -f ' + fps or '')
+            os.system('nohup ' + currentPath + '/video.sh' + options
+                      + ' > /dev/null 2>&1 &')
         elif command == 'videoOff':
             os.system('pkill mjpg_streamer')
         else:
