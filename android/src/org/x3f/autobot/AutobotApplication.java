@@ -16,7 +16,8 @@ import android.content.res.Resources.NotFoundException;
 public class AutobotApplication extends Application {
 	private String ip;
 	private String port;
-	private String videoPort = "8080";
+	private String videoPort;
+	private String videoResolution;
 	
 	public String getIp() {
 		return ip;
@@ -42,11 +43,21 @@ public class AutobotApplication extends Application {
 		this.videoPort = port;
 	}
 
+	public String getVideoResolution() {
+		return videoResolution;
+	}
+
+	public void setVideoResolution(String videoResolution) {
+		this.videoResolution = videoResolution;
+	}
+
 	@Override  
     public void onCreate() {
         super.onCreate();  
         setIp("10.0.0.1");
         setPort("8000");
+        setVideoPort("8080");
+        setVideoResolution("160x120");
     }
 	
 	public void call(String command, RequestParams params) {

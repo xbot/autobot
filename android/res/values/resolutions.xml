@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="resolutions">
+        <item>160x120</item>
+        <item>320x240</item>
+        <item>640×480</item>
+    </string-array>
+
+</resources>

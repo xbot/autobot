@@ -14,15 +14,55 @@
 	    android:layout_width="fill_parent"  
 	    android:layout_height="fill_parent" >  
 	    
-	    <ImageButton android:id="@+id/btnBackward"  
+		<ImageButton android:id="@+id/btnStop"
+		    android:contentDescription="@string/btn_stop"
+		    android:layout_width="100dp"
+		    android:layout_height="wrap_content"
+		    android:layout_centerInParent="true"  
+	        android:layout_centerHorizontal="true"  
+		    android:background="#00000000"
+		    android:src="@drawable/stop" />
+
+	    <ImageButton android:id="@+id/btnForward"  
+	        android:contentDescription="@string/btn_forward"
 	        android:layout_width="100dp"  
 	        android:layout_height="wrap_content"  
-	        android:layout_centerInParent="true"  
+	        android:layout_above="@id/btnStop"  
+	        android:layout_centerHorizontal="true"  
+	        android:background="#00000000"
+		    android:src="@drawable/arrow_up" />
+		
+	    <ImageButton android:id="@+id/btnBackward"  
+	        android:contentDescription="@string/btn_backward"
+	        android:layout_width="100dp"  
+	        android:layout_height="wrap_content"  
+	        android:layout_below="@id/btnStop"  
 	        android:layout_centerHorizontal="true"  
 	        android:background="#00000000"
 		    android:src="@drawable/arrow_down" />
+	    
+	    <ImageButton android:id="@+id/btnAdjLeft"  
+	        android:contentDescription="@string/btn_adjleft"
+	        android:layout_width="100dp"  
+	        android:layout_height="wrap_content"  
+	        android:layout_toStartOf="@id/btnStop"
+	        android:layout_toLeftOf="@id/btnStop"  
+	        android:layout_centerInParent="true"  
+	        android:background="#00000000"
+		    android:src="@drawable/arrow_left" />
+	    
+	    <ImageButton android:id="@+id/btnAdjRight"  
+	        android:contentDescription="@string/btn_adjright"
+	        android:layout_width="100dp"  
+	        android:layout_height="wrap_content"  
+	        android:layout_toEndOf="@id/btnStop"
+	        android:layout_toRightOf="@id/btnStop"  
+	        android:layout_centerInParent="true"  
+	        android:background="#00000000"
+		    android:src="@drawable/arrow_right" />
 	      
 		<ImageButton android:id="@+id/btnLeft"  
+		    android:contentDescription="@string/btn_left"
 	        android:layout_width="100dp"  
 	        android:layout_height="wrap_content"  
 	        android:layout_toStartOf="@id/btnBackward"
@@ -32,6 +72,7 @@
 		    android:src="@drawable/arrow_turnleft" />
 	    
 		<ImageButton android:id="@+id/btnRight"  
+		    android:contentDescription="@string/btn_right"
 	        android:layout_width="100dp"  
 	        android:layout_height="wrap_content"  
 	        android:layout_toRightOf="@id/btnBackward"
@@ -39,73 +80,36 @@
 	        android:layout_below="@id/btnBackward"  
 	        android:background="#00000000"
 		    android:src="@drawable/arrow_turnright" />
-		
-	    <ImageButton android:id="@+id/btnAdjLeft"  
-	        android:layout_width="100dp"  
-	        android:layout_height="wrap_content"  
-	        android:layout_toStartOf="@id/btnBackward"
-	        android:layout_toLeftOf="@id/btnBackward"  
-	        android:layout_above="@id/btnBackward"  
-	        android:background="#00000000"
-		    android:src="@drawable/arrow_left" />
-	    
-	    <ImageButton android:id="@+id/btnAdjRight"  
-	        android:layout_width="100dp"  
-	        android:layout_height="wrap_content"  
-	        android:layout_toRightOf="@id/btnBackward"
-	        android:layout_toEndOf="@id/btnBackward"  
-	        android:layout_above="@id/btnBackward"  
-	        android:background="#00000000"
-		    android:src="@drawable/arrow_right" />
-	    
-	    <ImageButton android:id="@+id/btnForward"  
-	        android:layout_width="100dp"  
-	        android:layout_height="wrap_content"  
-	        android:layout_toRightOf="@id/btnAdjLeft"
-	        android:layout_toEndOf="@id/btnAdjLeft"  
-	        android:layout_toLeftOf="@id/btnAdjRight" 
-	        android:layout_toStartOf="@id/btnAdjRight" 
-	        android:layout_above="@id/btnAdjLeft"  
-	        android:background="#00000000"
-		    android:src="@drawable/arrow_up" />
-
-		<ImageButton
-		    android:id="@+id/btnStop"
-		    android:layout_width="100dp"
-		    android:layout_height="wrap_content"
-		    android:layout_below="@+id/btnForward"
-		    android:layout_centerHorizontal="true"
-		    android:background="#00000000"
-		    android:src="@drawable/arrow_stop" />
 	
-	    <ImageButton
-	        android:id="@+id/btnGearDown"
+	    <ImageButton android:id="@+id/btnGearDown"
+	        android:contentDescription="@string/btn_geardown"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:layout_alignParentBottom="true"
 	        android:layout_alignParentRight="true"
 	        android:layout_alignParentEnd="true"
 	        android:background="#00000000"
-		    android:src="@drawable/btn_geardown" />
+		    android:src="@drawable/geardown" />
 	
-	    <ImageButton
-	        android:id="@+id/btnGearUp"
+	    <ImageButton android:id="@+id/btnGearUp"
+	        android:contentDescription="@string/btn_gearup"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:layout_above="@+id/btnGearDown"
 	        android:layout_alignParentRight="true"
 	        android:layout_alignParentEnd="true"
 	        android:background="#00000000"
-		    android:src="@drawable/btn_gearup" />
+		    android:src="@drawable/gearup" />
 
 	    <ToggleButton
 	        android:id="@+id/btnToggleVideo"
+	        style="@style/toggleButton"
+	        android:background="@drawable/ic_toggle_bg"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:layout_alignParentLeft="true"
-	        android:layout_alignTop="@+id/btnGearDown"
-	        android:textOn="@string/btn_disablevideo"
-	        android:textOff="@string/btn_enablevideo" />
+	        android:layout_alignParentStart="true"
+	        android:layout_alignTop="@+id/btnGearDown" />
 	  
 	</RelativeLayout>
 </FrameLayout>

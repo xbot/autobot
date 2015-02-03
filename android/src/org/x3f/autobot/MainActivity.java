@@ -6,20 +6,29 @@ import com.loopj.android.http.*;
 
 import org.json.*;
 import org.apache.http.Header;
+
 import android.content.Intent;
 import android.content.res.Resources.NotFoundException;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 public class MainActivity extends FragmentActivity implements OnClickListener {
 
 	private long exitTime;
+	private EditText editIP;
+	private EditText editPort;
+	private EditText editVideoPort;
+	private Spinner spinRslv;
+	private ArrayAdapter<?> spinRslvAdp;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -28,14 +37,18 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 		
 		View btnConn = this.findViewById(R.id.btnConnect);
 		btnConn.setOnClickListener(this);
-		View btnAbout = this.findViewById(R.id.btnAbout);
-		btnAbout.setOnClickListener(this);
 		
 		AutobotApplication app = (AutobotApplication)getApplication();
-		EditText editIP = (EditText) this.findViewById(R.id.editIP);
+		editIP = (EditText) this.findViewById(R.id.editIP);
 		editIP.setText(app.getIp());
-		EditText editPort = (EditText) this.findViewById(R.id.editPort);
+		editPort = (EditText) this.findViewById(R.id.editPort);
 		editPort.setText(app.getPort());
+		editVideoPort = (EditText) this.findViewById(R.id.editVideoPort);
+		editVideoPort.setText(app.getVideoPort());
+		spinRslv = (Spinner) this.findViewById(R.id.spinRslv);
+		spinRslvAdp = ArrayAdapter.createFromResource(this, R.array.resolutions, android.R.layout.simple_spinner_item);  
+		spinRslvAdp.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);  
+		spinRslv.setAdapter(spinRslvAdp);
 	}
 
 	@Override
@@ -44,6 +57,17 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 		getMenuInflater().inflate(R.menu.activity_main, menu);
 		return true;
 	}
+	
+	@Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+    	switch (item.getItemId()) {
+    		case R.id.about:
+    			Intent settings_intent = new Intent(this, AboutActivity.class);
+    			startActivity(settings_intent);
+    			return true;
+    	}
+    	return false;
+    }
 	
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -62,23 +86,31 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 
 	@Override
 	public void onClick(View v) {
-		Bundle b = new Bundle();
 		switch(v.getId()) {
 		case R.id.btnConnect:
-			// Check ip address and port
-			EditText editIP = (EditText) this.findViewById(R.id.editIP);
+			// Fetch ip
 			if (editIP.getText().length()<=0) {
 				Toast.makeText(getApplicationContext(), this.getString(R.string.msg_emptyip), Toast.LENGTH_SHORT).show();
 				break;
 			}
 			AutobotApplication app = (AutobotApplication)getApplication();
 			app.setIp(editIP.getText().toString());
-			EditText editPort = (EditText) this.findViewById(R.id.editPort);
+			// Fetch port
 			if (editPort.getText().length()<=0) {
 				Toast.makeText(getApplicationContext(), this.getString(R.string.msg_emptyport), Toast.LENGTH_SHORT).show();
 				break;
 			}
 			app.setPort(editPort.getText().toString());
+			// Fetch video port
+			if (editVideoPort.getText().length()<=0) {
+				Toast.makeText(getApplicationContext(), this.getString(R.string.msg_emptyvideoport), Toast.LENGTH_SHORT).show();
+				break;
+			}
+			app.setPort(editPort.getText().toString());
+			// Fetch resolution
+			int pos = spinRslv.getSelectedItemPosition();
+			String[] resolutions = getResources().getStringArray(R.array.resolutions);
+			app.setVideoResolution(resolutions[pos]);
 			
 			// Test connection.
 			RestClient.get("http://" + editIP.getText() + ":" + editPort.getText() + "/connect", null, new JsonHttpResponseHandler() {
@@ -111,10 +143,6 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 	            	Toast.makeText(getApplicationContext(), error, Toast.LENGTH_SHORT).show();
 	            }
 			});
-			break;
-		case R.id.btnAbout:
-			Intent iAbout = new Intent(this, AboutActivity.class);
-			startActivity(iAbout);
 			break;
 		}
 	}

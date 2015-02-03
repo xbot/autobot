@@ -14,6 +14,7 @@
     <string name="app_connect">連接</string>
     <string name="msg_emptyip">IP地址不能為空</string>
     <string name="msg_emptyport">端口不能為空</string>
+    <string name="msg_emptyvideoport">視頻服務端口不能為空</string>
     <string name="btn_forward">直行</string>
     <string name="btn_backward">倒車</string>
     <string name="btn_left">左轉</string>
@@ -25,11 +26,12 @@
     <string name="btn_geardown">減速20%</string>
     <string name="hint_ipaddr">IP地址</string>
     <string name="hint_port">端口</string>
-    <string name="msg_currentspeed">当前速度</string>
-	<string name="msg_connected">连接已建立</string>
-	<string name="msg_connectionfailed">连接失败</string>
-	<string name="title_imageerror">Error on preparing images</string>
-	<string name="btn_enablevideo">监控</string>
-	<string name="btn_disablevideo">关闭</string>
+    <string name="hint_videoport">視頻服務端口</string>
+    <string name="msg_currentspeed">當前速度</string>
+	<string name="msg_connected">連接已建立</string>
+	<string name="msg_connectionfailed">連接失敗</string>
+	<string name="title_imageerror">接收視頻失敗</string>
+	<string name="btn_enablevideo">監控</string>
+	<string name="btn_disablevideo">關閉</string>
 
 </resources>

@@ -8,6 +8,9 @@
 package org.x3f.autobot;
 
 public final class R {
+    public static final class array {
+        public static final int resolutions=0x7f050000;
+    }
     public static final class attr {
     }
     public static final class dimen {
@@ -25,38 +28,44 @@ public final class R {
         public static final int arrow_down=0x7f020000;
         public static final int arrow_left=0x7f020001;
         public static final int arrow_right=0x7f020002;
-        public static final int arrow_stop=0x7f020003;
-        public static final int arrow_turnleft=0x7f020004;
-        public static final int arrow_turnright=0x7f020005;
-        public static final int arrow_up=0x7f020006;
-        public static final int btn_geardown=0x7f020007;
-        public static final int btn_gearup=0x7f020008;
-        public static final int ic_launcher=0x7f020009;
-        public static final int logo=0x7f02000a;
+        public static final int arrow_turnleft=0x7f020003;
+        public static final int arrow_turnright=0x7f020004;
+        public static final int arrow_up=0x7f020005;
+        public static final int geardown=0x7f020006;
+        public static final int gearup=0x7f020007;
+        public static final int ic_launcher=0x7f020008;
+        public static final int ic_toggle=0x7f020009;
+        public static final int ic_toggle_bg=0x7f02000a;
+        public static final int logo=0x7f02000b;
+        public static final int stop=0x7f02000c;
+        public static final int webcam_off=0x7f02000d;
+        public static final int webcam_on=0x7f02000e;
     }
     public static final class id {
-        public static final int app_name=0x7f080010;
-        public static final int app_version=0x7f080011;
-        public static final int btnAbout=0x7f08000f;
-        public static final int btnAdjLeft=0x7f080004;
-        public static final int btnAdjRight=0x7f080005;
-        public static final int btnBackward=0x7f080001;
-        public static final int btnConnect=0x7f08000e;
-        public static final int btnForward=0x7f080006;
-        public static final int btnGearDown=0x7f080008;
-        public static final int btnGearUp=0x7f080009;
-        public static final int btnLeft=0x7f080002;
-        public static final int btnRight=0x7f080003;
-        public static final int btnStop=0x7f080007;
-        public static final int btnToggleVideo=0x7f08000a;
-        public static final int content=0x7f08000b;
-        public static final int copyright_author=0x7f080013;
-        public static final int copyright_product=0x7f080014;
-        public static final int editIP=0x7f08000c;
-        public static final int editPort=0x7f08000d;
-        public static final int linearLayout1=0x7f080012;
-        public static final int menu_settings=0x7f080015;
-        public static final int mv=0x7f080000;
+        public static final int about=0x7f090017;
+        public static final int app_name=0x7f090011;
+        public static final int app_version=0x7f090012;
+        public static final int btnAdjLeft=0x7f090004;
+        public static final int btnAdjRight=0x7f090005;
+        public static final int btnBackward=0x7f090003;
+        public static final int btnConnect=0x7f090010;
+        public static final int btnForward=0x7f090002;
+        public static final int btnGearDown=0x7f090008;
+        public static final int btnGearUp=0x7f090009;
+        public static final int btnLeft=0x7f090006;
+        public static final int btnRight=0x7f090007;
+        public static final int btnStop=0x7f090001;
+        public static final int btnToggleVideo=0x7f09000a;
+        public static final int content=0x7f09000b;
+        public static final int copyright_author=0x7f090014;
+        public static final int copyright_product=0x7f090015;
+        public static final int editIP=0x7f09000c;
+        public static final int editPort=0x7f09000d;
+        public static final int editVideoPort=0x7f09000e;
+        public static final int linearLayout1=0x7f090013;
+        public static final int menu_settings=0x7f090016;
+        public static final int mv=0x7f090000;
+        public static final int spinRslv=0x7f09000f;
     }
     public static final class layout {
         public static final int activity_about=0x7f030000;
@@ -65,42 +74,44 @@ public final class R {
         public static final int activity_splash=0x7f030003;
     }
     public static final class menu {
-        public static final int activity_about=0x7f070000;
-        public static final int activity_main=0x7f070001;
-        public static final int activity_splash=0x7f070002;
+        public static final int activity_about=0x7f080000;
+        public static final int activity_main=0x7f080001;
+        public static final int activity_splash=0x7f080002;
     }
     public static final class string {
-        public static final int about_content=0x7f050005;
-        public static final int about_title=0x7f050003;
-        public static final int app_author=0x7f050002;
-        public static final int app_connect=0x7f050009;
-        public static final int app_desc=0x7f050001;
+        public static final int about_content=0x7f060005;
+        public static final int about_title=0x7f060003;
+        public static final int app_author=0x7f060002;
+        public static final int app_connect=0x7f060009;
+        public static final int app_desc=0x7f060001;
         /**  Titles 
          */
-        public static final int app_name=0x7f050000;
-        public static final int app_version=0x7f050004;
-        public static final int btn_adjleft=0x7f050010;
-        public static final int btn_adjright=0x7f050011;
-        public static final int btn_backward=0x7f05000d;
-        public static final int btn_disablevideo=0x7f05001c;
-        public static final int btn_enablevideo=0x7f05001b;
-        public static final int btn_forward=0x7f05000c;
-        public static final int btn_geardown=0x7f050014;
-        public static final int btn_gearup=0x7f050013;
-        public static final int btn_left=0x7f05000e;
-        public static final int btn_right=0x7f05000f;
-        public static final int btn_stop=0x7f050012;
-        public static final int hint_ipaddr=0x7f050015;
-        public static final int hint_port=0x7f050016;
-        public static final int label_about=0x7f050006;
-        public static final int menu_settings=0x7f050007;
-        public static final int msg_connected=0x7f050018;
-        public static final int msg_connectionfailed=0x7f050019;
-        public static final int msg_currentspeed=0x7f050017;
-        public static final int msg_emptyip=0x7f05000a;
-        public static final int msg_emptyport=0x7f05000b;
-        public static final int msg_quit=0x7f050008;
-        public static final int title_imageerror=0x7f05001a;
+        public static final int app_name=0x7f060000;
+        public static final int app_version=0x7f060004;
+        public static final int btn_adjleft=0x7f060011;
+        public static final int btn_adjright=0x7f060012;
+        public static final int btn_backward=0x7f06000e;
+        public static final int btn_disablevideo=0x7f06001e;
+        public static final int btn_enablevideo=0x7f06001d;
+        public static final int btn_forward=0x7f06000d;
+        public static final int btn_geardown=0x7f060015;
+        public static final int btn_gearup=0x7f060014;
+        public static final int btn_left=0x7f06000f;
+        public static final int btn_right=0x7f060010;
+        public static final int btn_stop=0x7f060013;
+        public static final int hint_ipaddr=0x7f060016;
+        public static final int hint_port=0x7f060017;
+        public static final int hint_videoport=0x7f060018;
+        public static final int label_about=0x7f060006;
+        public static final int menu_settings=0x7f060007;
+        public static final int msg_connected=0x7f06001a;
+        public static final int msg_connectionfailed=0x7f06001b;
+        public static final int msg_currentspeed=0x7f060019;
+        public static final int msg_emptyip=0x7f06000a;
+        public static final int msg_emptyport=0x7f06000b;
+        public static final int msg_emptyvideoport=0x7f06000c;
+        public static final int msg_quit=0x7f060008;
+        public static final int title_imageerror=0x7f06001c;
     }
     public static final class style {
         /** 
@@ -124,12 +135,14 @@ public final class R {
     
  API 14 theme customizations can go here. 
          */
-        public static final int AppBaseTheme=0x7f060000;
+        public static final int AppBaseTheme=0x7f070000;
         /**  Application theme. 
  All customizations that are NOT specific to a particular API-level can go here. 
          */
-        public static final int AppTheme=0x7f060001;
-        public static final int ButtonBar=0x7f060003;
-        public static final int ButtonBarButton=0x7f060002;
+        public static final int AppTheme=0x7f070001;
+        public static final int ButtonBar=0x7f070003;
+        public static final int ButtonBarButton=0x7f070002;
+        public static final int Widget_Button_Toggle=0x7f070004;
+        public static final int toggleButton=0x7f070005;
     }
 }
