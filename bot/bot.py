@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 # -*- coding: utf-8 -*-
 
 """
@@ -40,6 +40,7 @@ from SocketServer import ThreadingMixIn
 import RPi.GPIO as GPIO
 import os
 import threading
+import time
 
 PORT = 8000  # Listening port
 PINS = (12, 16, 18, 22)  # GPIO pin numbers
@@ -351,14 +352,15 @@ class Bot(object):
         GPIO.setup(pinEcho, GPIO.IN)
 
         def calc_distance(channel):
-            startTime = time.time()
-            while GPIO.input(pinEcho) == GPIO.HIGH:
-                pass
-            endTime = time.time()
+            if GPIO.input(pinEcho) == GPIO.HIGH:
+                self._startTime = time.time()
+            else:
+                self._endTime = time.time()
+                delta = self._endTime - self._startTime
+                if 0.0235 > delta > 0.00015:
+                    print round(delta * 340 / 2, 2), delta
 
-            print round((endTime - startTime) * 340 / 2, 2)
-
-        GPIO.add_event_detect(pinEcho, GPIO.RISING,
+        GPIO.add_event_detect(pinEcho, GPIO.BOTH,
                               callback=calc_distance)
 
         def keep_checking_front():
@@ -389,7 +391,7 @@ class Bot(object):
 
         """
 
-        return isinstance(self._ultrasonicThread, thread.Thread) \
+        return isinstance(self._ultrasonicThread, threading.Thread) \
             and self._ultrasonicThread.isAlive()
 
 
