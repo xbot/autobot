@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 """
@@ -39,6 +39,7 @@ import json
 from SocketServer import ThreadingMixIn
 import RPi.GPIO as GPIO
 import os
+import threading
 
 PORT = 8000  # Listening port
 PINS = (12, 16, 18, 22)  # GPIO pin numbers
@@ -51,6 +52,8 @@ class Bot(object):
     (mtrL1, mtrL2, mtrR1, mtrR2) = (None, None, None, None)  # PWM driven motor inputs
     _speed = 0  # the current speed
     _motion = None  # the current motion
+    _keepUltrasonicRunning = False  # whether to keep ultrasonic thread running
+    _ultrasonicThread = None  # The ultrasonic thread
 
     def __init__(self, pins):
         """ Init Bot instance.
@@ -332,6 +335,62 @@ class Bot(object):
         """
 
         return self._motion
+
+    def performUltrasonic(self, pins):
+        """ Do distance detection leveraging ultrasonic.
+
+        :returns: void
+
+        """
+
+        # pinTrig = 21
+        # pinEcho = 23
+
+        (pinTrig, pinEcho) = pins
+        GPIO.setup(pinTrig, GPIO.OUT)
+        GPIO.setup(pinEcho, GPIO.IN)
+
+        def calc_distance(channel):
+            startTime = time.time()
+            while GPIO.input(pinEcho) == GPIO.HIGH:
+                pass
+            endTime = time.time()
+
+            print round((endTime - startTime) * 340 / 2, 2)
+
+        GPIO.add_event_detect(pinEcho, GPIO.RISING,
+                              callback=calc_distance)
+
+        def keep_checking_front():
+            self._keepUltrasonicRunning = True
+            while self._keepUltrasonicRunning:
+                GPIO.output(pinTrig, GPIO.HIGH)
+                time.sleep(0.00001)
+                GPIO.output(pinTrig, GPIO.LOW)
+                time.sleep(0.1)
+
+        self._ultrasonicThread = \
+            threading.Thread(target=keep_checking_front)
+        self._ultrasonicThread.start()
+
+    def stopUltrasonic(self):
+        """ Stop the ultrasonic thread.
+
+        :returns: void
+
+        """
+
+        self._keepUltrasonicRunning = False
+
+    def isUltrasonicRunning(self):
+        """ Check whether ultrasonic is running.
+
+        :returns: bool
+
+        """
+
+        return isinstance(self._ultrasonicThread, thread.Thread) \
+            and self._ultrasonicThread.isAlive()
 
 
 class RequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
