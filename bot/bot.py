@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 """
@@ -41,6 +41,7 @@ import RPi.GPIO as GPIO
 import os
 import threading
 import time
+import random
 
 PORT = 8000  # Listening port
 PINS = (12, 16, 18, 22)  # GPIO pin numbers
@@ -337,38 +338,85 @@ class Bot(object):
 
         return self._motion
 
-    def performUltrasonic(self, pins):
+    def startUltrasonic(self, pins):
         """ Do distance detection leveraging ultrasonic.
 
         :returns: void
 
         """
 
-        # pinTrig = 21
-        # pinEcho = 23
-
         (pinTrig, pinEcho) = pins
         GPIO.setup(pinTrig, GPIO.OUT)
         GPIO.setup(pinEcho, GPIO.IN)
 
-        tmp = None
-        def calc_distance(channel):
+        sendTime = None  # start time holder
+        lock = False  # exclusive lock
+        direction = None  # > 0.5 for left, <= 0.5 for right
+
+        def exclusive(fn):
+            """ Keep the given function exclusive among threads. """
+
+            def wrapper(*args, **kwds):
+                global lock
+                if lock is True:
+                    return
+                lock = True
+                fn(*args, **kwds)
+                lock = False
+
+            return wrapper
+
+        @exclusive
+        def on_echo(channel):
+            """ Record the time when a wave is sent out or calculate 
+            the distance when a wave is received, then react on the distance.
+            """
+
+            def act_on_my_own(distance):
+                """ Act on the bot's own. """
+
+                if distance < 20:  # turn left or right randomly on a distance less than 20cm.
+                    currentSpeed = self.getSpeed()
+                    self.setSpeed(100)
+                    if direction is None:
+                        direction = random.random()
+                    if direction > 0.5:
+                        self.turnLeft()
+                    else:
+                        self.turnRight()
+                    time.sleep(0.5)
+                    self.setSpeed(currentSpeed)
+                else:
+                    if self.getMotion() != 'forward':  # keep going forward.
+                        self.forward()
+                    direction = None
+
+            def stop_on_collision_threat(distance):
+                """ Stop if there is a collision threat. """
+
+                if distance < 20:
+                    self.stop()
+
+            # Read PWL, high for rising edge and low for falling edge.
+
             try:
                 pwl = GPIO.input(pinEcho)
             except RuntimeError:
                 return
-                
-            if pwl == GPIO.HIGH:
-                tmp = time.time()
-            else:
-                delta = time.time() - tmp
-                if 0.0235 > delta > 0.00015:
-                    print round(delta * 340 / 2, 2), delta
 
-        GPIO.add_event_detect(pinEcho, GPIO.BOTH,
-                              callback=calc_distance)
+            if pwl == GPIO.HIGH:
+                sendTime = time.time()
+            else:
+                delta = time.time() - sendTime
+                if 0.0235 > delta > 0.00015:  # Consider a distance between 2 and 400 cm as a reasonable value
+                    distance = round(delta * 34000 / 2, 2)
+                    act_on_my_own(distance)
+
+        GPIO.add_event_detect(pinEcho, GPIO.BOTH, callback=on_echo)
 
         def keep_checking_front():
+            """ Keep sending waves. """
+
             try:
                 self._keepUltrasonicRunning = True
                 while self._keepUltrasonicRunning:
