@@ -351,12 +351,17 @@ class Bot(object):
         GPIO.setup(pinTrig, GPIO.OUT)
         GPIO.setup(pinEcho, GPIO.IN)
 
+        tmp = None
         def calc_distance(channel):
-            if GPIO.input(pinEcho) == GPIO.HIGH:
-                self._startTime = time.time()
+            try:
+                pwl = GPIO.input(pinEcho)
+            except RuntimeError:
+                return
+                
+            if pwl == GPIO.HIGH:
+                tmp = time.time()
             else:
-                self._endTime = time.time()
-                delta = self._endTime - self._startTime
+                delta = time.time() - tmp
                 if 0.0235 > delta > 0.00015:
                     print round(delta * 340 / 2, 2), delta
 
@@ -364,12 +369,16 @@ class Bot(object):
                               callback=calc_distance)
 
         def keep_checking_front():
-            self._keepUltrasonicRunning = True
-            while self._keepUltrasonicRunning:
-                GPIO.output(pinTrig, GPIO.HIGH)
-                time.sleep(0.00001)
-                GPIO.output(pinTrig, GPIO.LOW)
-                time.sleep(0.1)
+            try:
+                self._keepUltrasonicRunning = True
+                while self._keepUltrasonicRunning:
+                    GPIO.output(pinTrig, GPIO.HIGH)
+                    time.sleep(0.00001)
+                    GPIO.output(pinTrig, GPIO.LOW)
+                    time.sleep(0.1)
+            except RuntimeError:
+                self._keepUltrasonicRunning = False
+                return
 
         self._ultrasonicThread = \
             threading.Thread(target=keep_checking_front)
