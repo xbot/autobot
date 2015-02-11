@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 # -*- coding: utf-8 -*-
 
 """
@@ -45,6 +45,22 @@ import random
 
 PORT = 8000  # Listening port
 PINS = (12, 16, 18, 22)  # GPIO pin numbers
+
+lock = False  # exclusive lock
+
+
+def exclusive(fn):
+    """ Keep the given function exclusive among threads. """
+
+    def wrapper(*args, **kwds):
+        global lock
+        if lock is True:
+            return
+        lock = True
+        fn(*args, **kwds)
+        lock = False
+
+    return wrapper
 
 
 class Bot(object):
@@ -350,21 +366,7 @@ class Bot(object):
         GPIO.setup(pinEcho, GPIO.IN)
 
         sendTime = None  # start time holder
-        lock = False  # exclusive lock
         direction = None  # > 0.5 for left, <= 0.5 for right
-
-        def exclusive(fn):
-            """ Keep the given function exclusive among threads. """
-
-            def wrapper(*args, **kwds):
-                global lock
-                if lock is True:
-                    return
-                lock = True
-                fn(*args, **kwds)
-                lock = False
-
-            return wrapper
 
         @exclusive
         def on_echo(channel):
@@ -375,7 +377,10 @@ class Bot(object):
             def act_on_my_own(distance):
                 """ Act on the bot's own. """
 
+                global direction
                 if distance < 20:  # turn left or right randomly on a distance less than 20cm.
+                    if ['left', 'right'].count(self.getMotion()) > 0:
+                        return
                     currentSpeed = self.getSpeed()
                     self.setSpeed(100)
                     if direction is None:
@@ -404,6 +409,7 @@ class Bot(object):
             except RuntimeError:
                 return
 
+            global sendTime
             if pwl == GPIO.HIGH:
                 sendTime = time.time()
             else:
