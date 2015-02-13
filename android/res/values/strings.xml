@@ -31,8 +31,12 @@
     <string name="msg_currentspeed">當前速度</string>
 	<string name="msg_connected">連接已建立</string>
 	<string name="msg_connectionfailed">連接失敗</string>
+	<string name="msg_behavior_none">手動操作</string>
+	<string name="msg_behavior_anticollision">手動並防撞</string>
+	<string name="msg_behavior_automation">自主行動</string>
 	<string name="title_imageerror">接收視頻失敗</string>
 	<string name="btn_enablevideo">監控</string>
 	<string name="btn_disablevideo">關閉</string>
+	<string name="img_avatar">Autobot</string>
 
 </resources>

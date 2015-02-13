@@ -110,6 +110,16 @@
 	        android:layout_alignParentLeft="true"
 	        android:layout_alignParentStart="true"
 	        android:layout_alignTop="@+id/btnGearDown" />
+
+	    <ImageButton
+	        android:id="@+id/btnSwitchBehavior"
+	        android:contentDescription="@string/img_avatar"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_alignParentLeft="true"
+	        android:layout_alignParentStart="true"
+	        android:background="#00000000"
+	        android:src="@drawable/avatar" />
 	  
 	</RelativeLayout>
 </FrameLayout>

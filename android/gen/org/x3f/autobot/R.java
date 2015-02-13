@@ -31,42 +31,46 @@ public final class R {
         public static final int arrow_turnleft=0x7f020003;
         public static final int arrow_turnright=0x7f020004;
         public static final int arrow_up=0x7f020005;
-        public static final int geardown=0x7f020006;
-        public static final int gearup=0x7f020007;
-        public static final int ic_launcher=0x7f020008;
-        public static final int ic_toggle=0x7f020009;
-        public static final int ic_toggle_bg=0x7f02000a;
-        public static final int logo=0x7f02000b;
-        public static final int stop=0x7f02000c;
-        public static final int webcam_off=0x7f02000d;
-        public static final int webcam_on=0x7f02000e;
+        public static final int avatar=0x7f020006;
+        public static final int avatar_gray=0x7f020007;
+        public static final int avatar_red=0x7f020008;
+        public static final int geardown=0x7f020009;
+        public static final int gearup=0x7f02000a;
+        public static final int ic_launcher=0x7f02000b;
+        public static final int ic_toggle=0x7f02000c;
+        public static final int ic_toggle_bg=0x7f02000d;
+        public static final int logo=0x7f02000e;
+        public static final int stop=0x7f02000f;
+        public static final int webcam_off=0x7f020010;
+        public static final int webcam_on=0x7f020011;
     }
     public static final class id {
-        public static final int about=0x7f090018;
-        public static final int app_name=0x7f090012;
-        public static final int app_version=0x7f090013;
+        public static final int about=0x7f090019;
+        public static final int app_name=0x7f090013;
+        public static final int app_version=0x7f090014;
         public static final int btnAdjLeft=0x7f090004;
         public static final int btnAdjRight=0x7f090005;
         public static final int btnBackward=0x7f090003;
-        public static final int btnConnect=0x7f090011;
+        public static final int btnConnect=0x7f090012;
         public static final int btnForward=0x7f090002;
         public static final int btnGearDown=0x7f090008;
         public static final int btnGearUp=0x7f090009;
         public static final int btnLeft=0x7f090006;
         public static final int btnRight=0x7f090007;
         public static final int btnStop=0x7f090001;
+        public static final int btnSwitchBehavior=0x7f09000b;
         public static final int btnToggleVideo=0x7f09000a;
-        public static final int content=0x7f09000b;
-        public static final int copyright_author=0x7f090015;
-        public static final int copyright_product=0x7f090016;
-        public static final int editFps=0x7f090010;
-        public static final int editIP=0x7f09000c;
-        public static final int editPort=0x7f09000d;
-        public static final int editVideoPort=0x7f09000e;
-        public static final int linearLayout1=0x7f090014;
-        public static final int menu_settings=0x7f090017;
+        public static final int content=0x7f09000c;
+        public static final int copyright_author=0x7f090016;
+        public static final int copyright_product=0x7f090017;
+        public static final int editFps=0x7f090011;
+        public static final int editIP=0x7f09000d;
+        public static final int editPort=0x7f09000e;
+        public static final int editVideoPort=0x7f09000f;
+        public static final int linearLayout1=0x7f090015;
+        public static final int menu_settings=0x7f090018;
         public static final int mv=0x7f090000;
-        public static final int spinRslv=0x7f09000f;
+        public static final int spinRslv=0x7f090010;
     }
     public static final class layout {
         public static final int activity_about=0x7f030000;
@@ -92,8 +96,8 @@ public final class R {
         public static final int btn_adjleft=0x7f060012;
         public static final int btn_adjright=0x7f060013;
         public static final int btn_backward=0x7f06000f;
-        public static final int btn_disablevideo=0x7f06001f;
-        public static final int btn_enablevideo=0x7f06001e;
+        public static final int btn_disablevideo=0x7f060022;
+        public static final int btn_enablevideo=0x7f060021;
         public static final int btn_forward=0x7f06000e;
         public static final int btn_geardown=0x7f060016;
         public static final int btn_gearup=0x7f060015;
@@ -103,8 +107,12 @@ public final class R {
         public static final int hint_ipaddr=0x7f060017;
         public static final int hint_port=0x7f060018;
         public static final int hint_videoport=0x7f060019;
+        public static final int img_avatar=0x7f060023;
         public static final int label_about=0x7f060006;
         public static final int menu_settings=0x7f060007;
+        public static final int msg_behavior_anticollision=0x7f06001e;
+        public static final int msg_behavior_automation=0x7f06001f;
+        public static final int msg_behavior_none=0x7f06001d;
         public static final int msg_connected=0x7f06001b;
         public static final int msg_connectionfailed=0x7f06001c;
         public static final int msg_currentspeed=0x7f06001a;
@@ -113,7 +121,7 @@ public final class R {
         public static final int msg_emptyvideofps=0x7f06000d;
         public static final int msg_emptyvideoport=0x7f06000c;
         public static final int msg_quit=0x7f060008;
-        public static final int title_imageerror=0x7f06001d;
+        public static final int title_imageerror=0x7f060020;
     }
     public static final class style {
         /** 

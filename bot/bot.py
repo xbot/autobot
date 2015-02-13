@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 """
@@ -44,7 +44,14 @@ import time
 import random
 
 PORT = 8000  # Listening port
-PINS = (12, 16, 18, 22)  # GPIO pin numbers
+PINS = (  # GPIO pin numbers
+    12,
+    16,
+    18,
+    22,
+    21,
+    23,
+    )
 
 lock = False  # exclusive lock
 
@@ -67,11 +74,17 @@ class Bot(object):
 
     """ The Bot Object. """
 
-    (mtrL1, mtrL2, mtrR1, mtrR2) = (None, None, None, None)  # PWM driven motor inputs
-    _speed = 0  # the current speed
-    _motion = None  # the current motion
-    _keepUltrasonicRunning = False  # whether to keep ultrasonic thread running
-    _ultrasonicThread = None  # The ultrasonic thread
+    BEHAVIOR_NONE = 0  # Completely manual operation.
+    BEHAVIOR_ANTICOLLISION = 1  # Manual operation, but stops in a collision threat.
+    BEHAVIOR_AUTOMATION = 2  # Completely automation.
+
+    (mtrL1, mtrL2, mtrR1, mtrR2) = (None, None, None, None)  # PWM driven motor inputs.
+    (pinTrig, pinEcho) = (None, None)  # Pins for ultrasonic.
+    _speed = 0  # The current speed.
+    _motion = None  # The current motion.
+    _keepUltrasonicRunning = False  # Whether to keep ultrasonic thread running.
+    _ultrasonicThread = None  # The ultrasonic thread.
+    _behavior = BEHAVIOR_NONE  # In which behavior the bot works.
 
     def __init__(self, pins):
         """ Init Bot instance.
@@ -84,7 +97,15 @@ class Bot(object):
         if type(pins) != types.TupleType or len(pins) != 4:
             raise TypeError('Parameter \'pins\' should be a tuple of four integers.'
                             )
-        (pinL1, pinL2, pinR1, pinR2) = pins
+
+        (
+            pinL1,
+            pinL2,
+            pinR1,
+            pinR2,
+            self.pinTrig,
+            self.pinEcho,
+            ) = pins
 
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(pinL1, GPIO.OUT)
@@ -99,6 +120,7 @@ class Bot(object):
         self.mtrL2.start(0)
         self.mtrR1.start(0)
         self.mtrR2.start(0)
+        self.initUltrasonic()
 
     def do(self, command, params=None):
         """ Follow command.
@@ -161,6 +183,16 @@ class Bot(object):
                       + ' > /dev/null 2>&1 &')
         elif command == 'videoOff':
             os.system('pkill mjpg_streamer')
+        elif command == 'behavior':
+            behavior = GetParam(params, 'v')
+            if behavior == self.BEHAVIOR_AUTOMATION or behavior \
+                == self.BEHAVIOR_ANTICOLLISION:
+                self.setBehavior(behavior)
+                if not self.isUltrasonicRunning():
+                    self.startUltrasonic()
+            else:
+                self.setBehavior(self.BEHAVIOR_NONE)
+                self.stopUltrasonic()
         else:
             raise Exception('Unknown command ' + command)
 
@@ -354,16 +386,34 @@ class Bot(object):
 
         return self._motion
 
-    def startUltrasonic(self, pins):
-        """ Do distance detection leveraging ultrasonic.
+    def getBehavior(self):
+        """ In which behavior the bot works.
+
+        :returns: int
+
+        """
+
+        return self._behavior
+
+    def setBehavior(self, behavior):
+        """ Set in which behavior the bot works.
+
+        :behavior: int
+        :returns: void
+
+        """
+
+        return self._behavior
+
+    def initUltrasonic(self):
+        """ Initialize ultrasonic function.
 
         :returns: void
 
         """
 
-        (pinTrig, pinEcho) = pins
-        GPIO.setup(pinTrig, GPIO.OUT)
-        GPIO.setup(pinEcho, GPIO.IN)
+        GPIO.setup(self.pinTrig, GPIO.OUT)
+        GPIO.setup(self.pinEcho, GPIO.IN)
 
         sendTime = None  # start time holder
         direction = None  # > 0.5 for left, <= 0.5 for right
@@ -405,7 +455,7 @@ class Bot(object):
             # Read PWL, high for rising edge and low for falling edge.
 
             try:
-                pwl = GPIO.input(pinEcho)
+                pwl = GPIO.input(self.pinEcho)
             except RuntimeError:
                 return
 
@@ -416,9 +466,23 @@ class Bot(object):
                 delta = time.time() - sendTime
                 if 0.0235 > delta > 0.00015:  # Consider a distance between 2 and 400 cm as a reasonable value
                     distance = round(delta * 34000 / 2, 2)
-                    act_on_my_own(distance)
+                    if self.getBehavior() \
+                        == self.BEHAVIOR_ANTICOLLISION:
+                        stop_on_collision_threat(distance)
+                    elif self.getBehavior() == self.BEHAVIOR_AUTOMATION:
+                        act_on_my_own(distance)
 
-        GPIO.add_event_detect(pinEcho, GPIO.BOTH, callback=on_echo)
+        GPIO.add_event_detect(self.pinEcho, GPIO.BOTH, callback=on_echo)
+
+    def startUltrasonic(self):
+        """ Start a new ultrasonic thread.
+
+        :returns: void
+
+        """
+
+        if self.isUltrasonicRunning():
+            return
 
         def keep_checking_front():
             """ Keep sending waves. """
@@ -426,9 +490,9 @@ class Bot(object):
             try:
                 self._keepUltrasonicRunning = True
                 while self._keepUltrasonicRunning:
-                    GPIO.output(pinTrig, GPIO.HIGH)
+                    GPIO.output(self.pinTrig, GPIO.HIGH)
                     time.sleep(0.00001)
-                    GPIO.output(pinTrig, GPIO.LOW)
+                    GPIO.output(self.pinTrig, GPIO.LOW)
                     time.sleep(0.1)
             except RuntimeError:
                 self._keepUltrasonicRunning = False

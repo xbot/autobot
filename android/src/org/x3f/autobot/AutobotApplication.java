@@ -19,6 +19,10 @@ public class AutobotApplication extends Application {
 	private String videoPort;
 	private String videoResolution;
 	private String videoFps;
+	private int behavior;
+	public static int BEHAVIOR_NONE = 0;
+	public static int BEHAVIOR_ANTICOLLISION = 1;
+	public static int BEHAVIOR_AUTOMATION = 2;
 	
 	public String getIp() {
 		return ip;
@@ -60,6 +64,14 @@ public class AutobotApplication extends Application {
 		this.videoFps = videoFps;
 	}
 
+	public int getBehavior() {
+		return behavior;
+	}
+
+	public void setBehavior(int behavior) {
+		this.behavior = behavior;
+	}
+
 	@Override  
     public void onCreate() {
         super.onCreate();  
@@ -68,6 +80,7 @@ public class AutobotApplication extends Application {
         setVideoPort("8080");
         setVideoResolution("160x120");
         setVideoFps("30");
+        setBehavior(BEHAVIOR_ANTICOLLISION);
     }
 	
 	public void call(String command, RequestParams params) {
@@ -100,6 +113,10 @@ public class AutobotApplication extends Application {
             	ToastUtil.showToast(getApplicationContext(), error);
             }
 		});
+	}
+	
+	public void call(String command, RequestParams params, JsonHttpResponseHandler callback) {
+		RestClient.get("http://" + getIp() + ":" + getPort() + "/" + command, params, callback);
 	}
 	
 	public String getVideoURL() {
