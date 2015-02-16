@@ -40,6 +40,7 @@ public class ControlActivity extends Activity implements OnClickListener,
 	private static final String TAG = "AUTOBOT";
 
 	private MjpegView videoView = null;
+	private ImageButton btnSwitchBehavior = null;
 
 	private static boolean suspending = false;
 
@@ -70,7 +71,8 @@ public class ControlActivity extends Activity implements OnClickListener,
 		btnGearDown.setOnClickListener(this);
 		View btnToggleVideo = this.findViewById(R.id.btnToggleVideo);
 		btnToggleVideo.setOnClickListener(this);
-		View btnSwitchBehavior = this.findViewById(R.id.btnSwitchBehavior);
+		btnSwitchBehavior = (ImageButton) this
+				.findViewById(R.id.btnSwitchBehavior);
 		btnSwitchBehavior.setOnClickListener(this);
 
 		videoView = (MjpegView) findViewById(R.id.mv);
@@ -118,7 +120,6 @@ public class ControlActivity extends Activity implements OnClickListener,
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				if (!videoView.isStreaming()) {
@@ -130,18 +131,23 @@ public class ControlActivity extends Activity implements OnClickListener,
 				videoView.stopPlayback();
 				videoView.setBackgroundColor(Color.BLACK);
 			}
+			break;
 		case R.id.btnSwitchBehavior:
 			if (app.getBehavior() == AutobotApplication.BEHAVIOR_NONE) {
 				// switch to anti-collision
-				params.add("v", String.valueOf(AutobotApplication.BEHAVIOR_ANTICOLLISION));
+				params.add("v", String
+						.valueOf(AutobotApplication.BEHAVIOR_ANTICOLLISION));
 			} else if (app.getBehavior() == AutobotApplication.BEHAVIOR_ANTICOLLISION) {
 				// switch to automation
-				params.add("v", String.valueOf(AutobotApplication.BEHAVIOR_AUTOMATION));
+				params.add("v",
+						String.valueOf(AutobotApplication.BEHAVIOR_AUTOMATION));
 			} else if (app.getBehavior() == AutobotApplication.BEHAVIOR_AUTOMATION) {
 				// switch to manual
-				params.add("v", String.valueOf(AutobotApplication.BEHAVIOR_NONE));
+				params.add("v",
+						String.valueOf(AutobotApplication.BEHAVIOR_NONE));
 			}
 			app.call("behavior", params, this.getBehaviorCallback());
+			break;
 		default:
 			break;
 		}
@@ -153,32 +159,46 @@ public class ControlActivity extends Activity implements OnClickListener,
 			public void onSuccess(int statusCode, Header[] headers,
 					JSONObject data) {
 				AutobotApplication app = (AutobotApplication) getApplication();
-//				View btnSwitchBehavior = this.findViewById(R.id.btnSwitchBehavior);
 				try {
 					if (data.getInt("code") != 0) {
 						ToastUtil.showToast(getApplicationContext(),
 								data.getString("msg"));
 					} else {
 						try {
-							int behavior = Integer.parseInt(data.getString("msg"));
+							int behavior = Integer.parseInt(data
+									.getString("data"));
 							if (behavior == AutobotApplication.BEHAVIOR_ANTICOLLISION) {
 								app.setBehavior(AutobotApplication.BEHAVIOR_ANTICOLLISION);
-								ToastUtil.showToast(getApplicationContext(), getString(R.string.msg_behavior_anticollision));
-//								btnSB.setImageDrawable(getResources().getDrawable(R.drawable.avatar));
+								ToastUtil
+										.showToast(
+												getApplicationContext(),
+												getString(R.string.msg_behavior_anticollision));
+								btnSwitchBehavior
+										.setImageDrawable(getResources()
+												.getDrawable(R.drawable.avatar_gray));
+							} else if (behavior == AutobotApplication.BEHAVIOR_AUTOMATION) {
+								app.setBehavior(AutobotApplication.BEHAVIOR_AUTOMATION);
+								ToastUtil
+										.showToast(
+												getApplicationContext(),
+												getString(R.string.msg_behavior_automation));
+								btnSwitchBehavior
+										.setImageDrawable(getResources()
+												.getDrawable(
+														R.drawable.avatar_red));
+							} else if (behavior == AutobotApplication.BEHAVIOR_NONE) {
+								app.setBehavior(AutobotApplication.BEHAVIOR_NONE);
+								ToastUtil.showToast(getApplicationContext(),
+										getString(R.string.msg_behavior_none));
+								btnSwitchBehavior
+										.setImageDrawable(getResources()
+												.getDrawable(
+														R.drawable.avatar));
 							}
 						} catch (NumberFormatException e) {
 							ToastUtil.showToast(getApplicationContext(),
 									data.getString("msg"));
 						}
-//						app.setBehavior(AutobotApplication.BEHAVIOR_ANTICOLLISION);
-//						ToastUtil.showToast(getApplicationContext(),
-//								getString(R.string.msg_behavior_anticollision));
-//						btnSB.setImageDrawable(getResources().getDrawable(
-//								R.drawable.avatar));
-//						ToastUtil.showToast(
-//								getApplicationContext(),
-//								getString(R.string.msg_currentspeed)
-//										+ data.getString("msg") + "%");
 					}
 				} catch (NotFoundException e) {
 					ToastUtil
@@ -257,13 +277,19 @@ public class ControlActivity extends Activity implements OnClickListener,
 
 	public void onResume() {
 		super.onResume();
+		
+		AutobotApplication app = (AutobotApplication) getApplication();
+		
 		if (videoView != null) {
 			if (suspending) {
-				AutobotApplication app = (AutobotApplication) getApplication();
 				new DoRead().execute(app.getVideoURL());
 				suspending = false;
 			}
 		}
+		
+		// Fetch autobot's states
+		RequestParams params = new RequestParams();
+		app.call("connect", params, this.getBehaviorCallback());
 	}
 
 	public void onStart() {

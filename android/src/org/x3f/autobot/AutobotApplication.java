@@ -80,7 +80,7 @@ public class AutobotApplication extends Application {
         setVideoPort("8080");
         setVideoResolution("160x120");
         setVideoFps("30");
-        setBehavior(BEHAVIOR_ANTICOLLISION);
+        setBehavior(BEHAVIOR_NONE);
     }
 	
 	public void call(String command, RequestParams params) {
@@ -91,7 +91,7 @@ public class AutobotApplication extends Application {
                 	if (data.getInt("code") != 0) {
                 		ToastUtil.showToast(getApplicationContext(), data.getString("msg"));
 					} else {
-						ToastUtil.showToast(getApplicationContext(), getString(R.string.msg_currentspeed) + data.getString("msg") + "%");
+						ToastUtil.showToast(getApplicationContext(), getString(R.string.msg_currentspeed) + data.getString("data") + "%");
 					}
 				} catch (NotFoundException e) {
 					ToastUtil.showToast(getApplicationContext(), e.getMessage());

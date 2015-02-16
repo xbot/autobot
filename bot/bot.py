@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 # -*- coding: utf-8 -*-
 
 """
@@ -51,7 +51,10 @@ PINS = (  # GPIO pin numbers
     22,
     21,
     23,
+    5,
+    3,
     )
+FRONT_SAFETY_DISTANCE = 30  # 30cm
 
 lock = False  # exclusive lock
 
@@ -79,23 +82,39 @@ class Bot(object):
     BEHAVIOR_AUTOMATION = 2  # Completely automation.
 
     (mtrL1, mtrL2, mtrR1, mtrR2) = (None, None, None, None)  # PWM driven motor inputs.
-    (pinTrig, pinEcho) = (None, None)  # Pins for ultrasonic.
+    (pinTrig, pinEcho, pinInfraredL, pinInfraredR) = (None, None, None,
+            None)  # Pins of ultrasonic and infrared sensors.
     _speed = 0  # The current speed.
     _motion = None  # The current motion.
     _keepUltrasonicRunning = False  # Whether to keep ultrasonic thread running.
     _ultrasonicThread = None  # The ultrasonic thread.
     _behavior = BEHAVIOR_NONE  # In which behavior the bot works.
+    _isFrontBlocked = False  # Whether is there a barrier in the front.
+    _direction = None  # <0.5 to turn left, >=0.5 to turn right.
+
+    def resume_behavior(fn):
+        """ Resume behavior when motion is changed. """
+
+        def wrapper(*args, **kwds):
+            this = args[0]
+            if (this.getBehavior() == this.BEHAVIOR_ANTICOLLISION
+                or this.getBehavior() == this.BEHAVIOR_AUTOMATION) \
+                and not this.isUltrasonicRunning():
+                this.startUltrasonic()
+            fn(*args, **kwds)
+
+        return wrapper
 
     def __init__(self, pins):
         """ Init Bot instance.
 
-        :pins: tuple, four pin numbers being used to control motors
+        :pins: tuple, pin numbers being used to control motors
         :returns: void
 
         """
 
-        if type(pins) != types.TupleType or len(pins) != 4:
-            raise TypeError('Parameter \'pins\' should be a tuple of four integers.'
+        if type(pins) != types.TupleType or len(pins) != 8:
+            raise TypeError("Parameter 'pins' should be a tuple of eight integers."
                             )
 
         (
@@ -105,6 +124,8 @@ class Bot(object):
             pinR2,
             self.pinTrig,
             self.pinEcho,
+            self.pinInfraredL,
+            self.pinInfraredR,
             ) = pins
 
         GPIO.setmode(GPIO.BOARD)
@@ -120,7 +141,8 @@ class Bot(object):
         self.mtrL2.start(0)
         self.mtrR1.start(0)
         self.mtrR2.start(0)
-        self.initUltrasonic()
+        self.initUltrasonicSensor()
+        self.initInfraredSensors()
 
     def do(self, command, params=None):
         """ Follow command.
@@ -185,17 +207,13 @@ class Bot(object):
             os.system('pkill mjpg_streamer')
         elif command == 'behavior':
             behavior = GetParam(params, 'v')
-            if behavior == self.BEHAVIOR_AUTOMATION or behavior \
-                == self.BEHAVIOR_ANTICOLLISION:
-                self.setBehavior(behavior)
-                if not self.isUltrasonicRunning():
-                    self.startUltrasonic()
-            else:
-                self.setBehavior(self.BEHAVIOR_NONE)
-                self.stopUltrasonic()
+            if behavior is not None and behavior.isdigit():
+                self.setBehavior(int(behavior))
+            return self.getBehavior()
         else:
             raise Exception('Unknown command ' + command)
 
+    @resume_behavior
     def forward(self, speed=None):
         """ Go forward.
 
@@ -236,10 +254,11 @@ class Bot(object):
         self.mtrR1.ChangeDutyCycle(0)
         self.mtrR2.ChangeDutyCycle(speed)
 
-    def turnLeft(self, speed=None):
+    def turnLeft(self, speed=None, isTmp=False):
         """ Turn left.
 
         :speed: float, speed percent, 0~100
+        :isTmp: bool, True to prevent from changing the global speed.
         :returns: void
 
         """
@@ -247,19 +266,21 @@ class Bot(object):
         if (speed is None or float(speed) <= 0) and (self.getSpeed()
                 is None or self.getSpeed() <= 0):
             speed = 20
-        if speed is not None:
-            self.setSpeed(speed)
-        speed = self.getSpeed()
+        if isTmp is not True:
+            if speed is not None:
+                self.setSpeed(speed)
+            speed = self.getSpeed()
         self.setMotion('left')
         self.mtrL1.ChangeDutyCycle(0)
         self.mtrL2.ChangeDutyCycle(speed)
         self.mtrR1.ChangeDutyCycle(speed)
         self.mtrR2.ChangeDutyCycle(0)
 
-    def turnRight(self, speed=None):
+    def turnRight(self, speed=None, isTmp=False):
         """ Turn right.
 
         :speed: float, speed percent, 0~100
+        :isTmp: float, True to prevent from changing the global speed.
         :returns: void
 
         """
@@ -267,9 +288,10 @@ class Bot(object):
         if (speed is None or float(speed) <= 0) and (self.getSpeed()
                 is None or self.getSpeed() <= 0):
             speed = 20
-        if speed is not None:
-            self.setSpeed(speed)
-        speed = self.getSpeed()
+        if isTmp is not True:
+            if speed is not None:
+                self.setSpeed(speed)
+            speed = self.getSpeed()
         self.setMotion('right')
         self.mtrL1.ChangeDutyCycle(speed)
         self.mtrL2.ChangeDutyCycle(0)
@@ -324,6 +346,9 @@ class Bot(object):
         :returns: void
 
         """
+
+        if self.isUltrasonicRunning():
+            self.stopUltrasonic()
 
         if holdSpeed is False:
             self.setSpeed(0)
@@ -403,9 +428,17 @@ class Bot(object):
 
         """
 
-        return self._behavior
+        self._behavior = behavior
 
-    def initUltrasonic(self):
+        if behavior == self.BEHAVIOR_AUTOMATION or behavior \
+            == self.BEHAVIOR_ANTICOLLISION:
+            if not self.isUltrasonicRunning():
+                self.startUltrasonic()
+
+        if behavior == self.BEHAVIOR_NONE:
+            self.stopUltrasonic()
+
+    def initUltrasonicSensor(self):
         """ Initialize ultrasonic function.
 
         :returns: void
@@ -416,7 +449,6 @@ class Bot(object):
         GPIO.setup(self.pinEcho, GPIO.IN)
 
         sendTime = None  # start time holder
-        direction = None  # > 0.5 for left, <= 0.5 for right
 
         @exclusive
         def on_echo(channel):
@@ -427,30 +459,19 @@ class Bot(object):
             def act_on_my_own(distance):
                 """ Act on the bot's own. """
 
-                global direction
-                if distance < 20:  # turn left or right randomly on a distance less than 20cm.
-                    if ['left', 'right'].count(self.getMotion()) > 0:
-                        return
-                    currentSpeed = self.getSpeed()
-                    self.setSpeed(100)
-                    if direction is None:
-                        direction = random.random()
-                    if direction > 0.5:
-                        self.turnLeft()
-                    else:
-                        self.turnRight()
-                    time.sleep(0.5)
-                    self.setSpeed(currentSpeed)
+                if distance < FRONT_SAFETY_DISTANCE:
+                    self._isFrontBlocked = True
                 else:
-                    if self.getMotion() != 'forward':  # keep going forward.
-                        self.forward()
-                    direction = None
+                    self._isFrontBlocked = False
+
+                states = self.getSensorStates()
+                self.actOnMyOwn(states)
 
             def stop_on_collision_threat(distance):
                 """ Stop if there is a collision threat. """
 
-                if distance < 20:
-                    self.stop()
+                if distance < FRONT_SAFETY_DISTANCE:
+                    self.stop(True)
 
             # Read PWL, high for rising edge and low for falling edge.
 
@@ -521,6 +542,97 @@ class Bot(object):
         return isinstance(self._ultrasonicThread, threading.Thread) \
             and self._ultrasonicThread.isAlive()
 
+    def initInfraredSensors(self):
+        """ Initialize infrared sensors.
+
+        :returns: void
+
+        """
+
+        def on_infrared(channel):
+            if self.getBehavior() == self.BEHAVIOR_AUTOMATION \
+                and self.isUltrasonicRunning():
+                states = self.getSensorStates()
+                self.actOnMyOwn(states)
+
+        GPIO.setup(self.pinInfraredL, GPIO.IN)
+        GPIO.setup(self.pinInfraredR, GPIO.IN)
+        GPIO.add_event_detect(self.pinInfraredL, GPIO.BOTH,
+                              callback=on_infrared)
+        GPIO.add_event_detect(self.pinInfraredR, GPIO.BOTH,
+                              callback=on_infrared)
+
+    def getSensorStates(self):
+        """ Return the states of those sensors.
+
+        :returns: list, [front, left, right]
+
+        """
+
+        return [self.isFrontBlocked(), self.isLeftBlocked(),
+                self.isRightBlocked()]
+
+    def isFrontBlocked(self):
+        """ Check if there is a barrier in the front.
+
+        :returns: bool
+
+        """
+
+        return self._isFrontBlocked
+
+    def isLeftBlocked(self):
+        """ Check if there is a barrier on the left side. 
+        
+        :returns: bool
+
+        """
+
+        return GPIO.input(self.pinInfraredL) == GPIO.LOW
+
+    def isRightBlocked(self):
+        """ Check if there is a barrier on the right side. 
+        
+        :returns: bool
+
+        """
+
+        return GPIO.input(self.pinInfraredR) == GPIO.LOW
+
+    def actOnMyOwn(self, states):
+        """ Let the bot descide how to act on the given sensor states. 
+        
+        :states: list, [front, left, right]
+        :returns: void
+
+        """
+
+        forwardStates = [[False, False, False], [False, True, True]]
+        leftStates = [[False, False, True], [True, False, True]]
+        rightStates = [[False, True, False], [True, True, False]]
+        randomStates = [[True, False, False], [True, True, True]]
+        if forwardStates.count(states) > 0:
+            if self.getMotion() != 'forward':
+                self.forward()
+            self._direction = None
+        elif leftStates.count(states) > 0:
+            if self.getMotion() != 'left':
+                self.turnLeft(80, True)
+        elif rightStates.count(states) > 0:
+            if self.getMotion() != 'right':
+                self.turnRight(80, True)
+        elif randomStates.count(states) > 0:
+            if ['left', 'right'].count(self.getMotion()) > 0:
+                return
+            if self._direction is None:
+                self._direction = random.random()
+            if self._direction < 0.5:
+                self.turnLeft(80, True)
+            else:
+                self.turnRight(80, True)
+        else:
+            raise Exception('Unknown sensor states: ' + str(states))
+
 
 class RequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
@@ -528,6 +640,19 @@ class RequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     bot = Bot(PINS)
 
+    def json_response(fn):
+
+        def wrapper(*args, **kwds):
+            this = args[0]
+            response = fn(*args, **kwds)
+            this.send_response(200)
+            this.end_headers()
+            this.wfile.write(json.dumps(response))
+            this.wfile.write('\n')
+
+        return wrapper
+
+    @json_response
     def do_GET(self):
         """ Handle GET requests
 
@@ -535,36 +660,25 @@ class RequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
         """
 
+        response = {'code': 0, 'msg': '', 'data': None}
         pathInfo = urlparse.urlparse(self.path)
         command = pathInfo.path.strip(' /')
         params = urlparse.parse_qs(pathInfo.query, True)
 
-        # make connection
-
         if command == 'connect':
-            return self._respond('ok')
+            response['data'] = self.bot.getBehavior()
+            return response
 
         try:
-            self.bot.do(command, params)
+            response['data'] = self.bot.do(command, params)
+            if response['data'] is None:
+                response['data'] = self.bot.getSpeed()
         except Exception, e:
-            return self._respond(str(e), 1)
+            response['code'] = 1
+            response['msg'] = str(e)
+            return response
 
-        return self._respond(self.bot.getSpeed())
-
-    def _respond(self, msg='', code=0):
-        """ Send response to the userside.
-
-        :msg: string, response data.
-        :code: int, status code, 0 for success, 1 for normal failure.
-        :returns: void
-
-        """
-
-        response = {'code': code, 'msg': msg}
-        self.send_response(200)
-        self.end_headers()
-        self.wfile.write(json.dumps(response))
-        self.wfile.write('\n')
+        return response
 
 
 class ThreadedServer(ThreadingMixIn, BaseHTTPServer.HTTPServer):
