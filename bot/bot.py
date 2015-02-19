@@ -56,21 +56,145 @@ PINS = (  # GPIO pin numbers
     )
 FRONT_SAFETY_DISTANCE = 30  # 30cm
 
-lock = False  # exclusive lock
+_lock = False  # exclusive lock
 
 
 def exclusive(fn):
     """ Keep the given function exclusive among threads. """
 
     def wrapper(*args, **kwds):
-        global lock
-        if lock is True:
+        global _lock
+        if _lock is True:
             return
-        lock = True
+        _lock = True
         fn(*args, **kwds)
-        lock = False
+        _lock = False
 
     return wrapper
+
+
+TIMER_STDBY = 'STDBY'
+TIMER_MOTOR = 'MOTOR'
+
+
+class Timer(object):
+
+    _genre = None
+    _dataDir = os.path.split(os.path.realpath(__file__))[0] \
+        + os.path.sep + 'data'
+    _file = None
+    _startTime = None
+    _data = None
+
+    def __init__(self, genre):
+        self._genre = genre
+        self._data = {'total': 0, 'thistime': 0}
+        self._file = self._dataDir + os.path.sep + genre
+        if not os.path.exists(self._dataDir):
+            os.mkdir(self._dataDir)
+        if os.path.exists(self._file) and os.path.isfile(self._file):
+            f = open(self._file, 'r')
+            self._data = json.load(f)
+            f.close()
+        if type(self._data) is not types.DictType \
+            or not self._data.has_key('total') \
+            or not self._data.has_key('thistime'):
+            raise Exception('Invalid timer data.')
+
+    def run(self):
+        if self._startTime is None:
+            self._startTime = time.time()
+
+    def stop(self, goOn=False):
+        if self._startTime is not None:
+            delta = time.time() - self._startTime
+            self._startTime = goOn and time.time() or None
+            self._data['total'] = self._data['total'] + delta
+            self._data['thistime'] = self._data['thistime'] + delta
+            f = open(self._file, 'w')
+            json.dump(self._data, f)
+            f.close()
+
+    def stash(self):
+        self.stop(True)
+
+
+class TimerThread(threading.Thread):
+
+    _keepRunning = True
+    daemon = True
+
+    def run(self):
+        self._timer.run()
+        while self._keepRunning is True:
+            time.sleep(10)
+            self._timer.stash()
+
+    def stop(self):
+        self.stopTimer()
+        self._keepRunning = False
+
+    def resumeTimer(self):
+        self._timer.run()
+
+    def stopTimer(self):
+        self._timer.stop()
+
+
+def singleton(cls, *args, **kw):
+    instances = {}
+
+    def _singleton():
+        if cls not in instances:
+            instances[cls] = cls(*args, **kw)
+        return instances[cls]
+
+    return _singleton
+
+
+@singleton
+class MotorTimerThread(TimerThread):
+
+    _timer = Timer(TIMER_MOTOR)
+
+
+@singleton
+class StdbyTimerThread(TimerThread):
+
+    _timer = Timer(TIMER_STDBY)
+
+
+def timed(genre, edge=None):
+
+    def _timer(fn):
+
+        def wrapper(*args, **kwds):
+            if genre == TIMER_STDBY:
+                _stdbyTimerThread = StdbyTimerThread()
+                if not _stdbyTimerThread.isAlive():
+                    _stdbyTimerThread.start()
+            elif genre == TIMER_MOTOR:
+                _motorTimerThread = MotorTimerThread()
+                if not _motorTimerThread.isAlive():
+                    _motorTimerThread.start()
+            else:
+                raise Exception('Unknown genre: ' + str(genre))
+
+            if genre == TIMER_MOTOR and edge == 0:
+                _motorTimerThread.resumeTimer()
+
+            ret = fn(*args, **kwds)
+
+            if genre == TIMER_STDBY:
+                _stdbyTimerThread.stop()
+            if genre == TIMER_MOTOR and edge == 1:
+                _motorTimerThread.stopTimer()
+
+            return ret
+
+        return wrapper
+
+    return _timer
 
 
 class Bot(object):
@@ -214,6 +338,7 @@ class Bot(object):
             raise Exception('Unknown command ' + command)
 
     @resume_behavior
+    @timed(TIMER_MOTOR, 0)
     def forward(self, speed=None):
         """ Go forward.
 
@@ -234,6 +359,7 @@ class Bot(object):
         self.mtrR1.ChangeDutyCycle(speed)
         self.mtrR2.ChangeDutyCycle(0)
 
+    @timed(TIMER_MOTOR, 0)
     def backward(self, speed=None):
         """ Go backward.
 
@@ -254,6 +380,7 @@ class Bot(object):
         self.mtrR1.ChangeDutyCycle(0)
         self.mtrR2.ChangeDutyCycle(speed)
 
+    @timed(TIMER_MOTOR, 0)
     def turnLeft(self, speed=None, isTmp=False):
         """ Turn left.
 
@@ -276,6 +403,7 @@ class Bot(object):
         self.mtrR1.ChangeDutyCycle(speed)
         self.mtrR2.ChangeDutyCycle(0)
 
+    @timed(TIMER_MOTOR, 0)
     def turnRight(self, speed=None, isTmp=False):
         """ Turn right.
 
@@ -298,6 +426,7 @@ class Bot(object):
         self.mtrR1.ChangeDutyCycle(0)
         self.mtrR2.ChangeDutyCycle(speed)
 
+    @timed(TIMER_MOTOR, 0)
     def adjustLeft(self):
         """ Turn left a little bit.
 
@@ -318,6 +447,7 @@ class Bot(object):
             self.mtrR1.ChangeDutyCycle(0)
             self.mtrR2.ChangeDutyCycle(speed)
 
+    @timed(TIMER_MOTOR, 0)
     def adjustRight(self):
         """ Turn right a little bit.
 
@@ -338,6 +468,7 @@ class Bot(object):
             self.mtrR1.ChangeDutyCycle(0)
             self.mtrR2.ChangeDutyCycle(tmpSpeed)
 
+    @timed(TIMER_MOTOR, 1)
     def stop(self, holdSpeed=False):
         """ Stop moving.
 
@@ -686,7 +817,8 @@ class ThreadedServer(ThreadingMixIn, BaseHTTPServer.HTTPServer):
     """ HTTP Server supporting threading. """
 
 
-if __name__ == '__main__':
+@timed(TIMER_STDBY)
+def main():
     httpd = ThreadedServer(('', PORT), RequestHandler)
     print 'Listening on port', PORT, ', press <Ctrl-C> to stop.'
     try:
@@ -694,3 +826,6 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         print 'Game over.'
     GPIO.cleanup()
+
+if __name__ == '__main__':
+    main()
