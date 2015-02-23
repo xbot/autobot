@@ -45,12 +45,12 @@ import random
 
 PORT = 8000  # Listening port
 PINS = (  # GPIO pin numbers
-    12,
-    16,
-    18,
     22,
-    21,
-    23,
+    18,
+    16,
+    12,
+    11,
+    13,
     5,
     3,
     )
@@ -339,10 +339,11 @@ class Bot(object):
 
     @resume_behavior
     @timed(TIMER_MOTOR, 0)
-    def forward(self, speed=None):
+    def forward(self, speed=None, isTmp=False):
         """ Go forward.
 
         :speed: float, speed percent, 0~100
+        :isTmp: bool, True to prevent from changing the global speed.
         :returns: void
 
         """
@@ -350,9 +351,10 @@ class Bot(object):
         if (speed is None or float(speed) <= 0) and (self.getSpeed()
                 is None or self.getSpeed() <= 0):
             speed = 20
-        if speed is not None:
-            self.setSpeed(speed)
-        speed = self.getSpeed()
+        if isTmp is not True:
+            if speed is not None:
+                self.setSpeed(speed)
+            speed = self.getSpeed()
         self.setMotion('forward')
         self.mtrL1.ChangeDutyCycle(speed)
         self.mtrL2.ChangeDutyCycle(0)
@@ -360,10 +362,11 @@ class Bot(object):
         self.mtrR2.ChangeDutyCycle(0)
 
     @timed(TIMER_MOTOR, 0)
-    def backward(self, speed=None):
+    def backward(self, speed=None, isTmp=False):
         """ Go backward.
 
         :speed: float, speed percent, 0~100
+        :isTmp: bool, True to prevent from changing the global speed.
         :returns: void
 
         """
@@ -371,9 +374,10 @@ class Bot(object):
         if (speed is None or float(speed) <= 0) and (self.getSpeed()
                 is None or self.getSpeed() <= 0):
             speed = 20
-        if speed is not None:
-            self.setSpeed(speed)
-        speed = self.getSpeed()
+        if isTmp is not True:
+            if speed is not None:
+                self.setSpeed(speed)
+            speed = self.getSpeed()
         self.setMotion('backward')
         self.mtrL1.ChangeDutyCycle(0)
         self.mtrL2.ChangeDutyCycle(speed)
@@ -473,16 +477,27 @@ class Bot(object):
         """ Stop moving.
 
         :holdSpeed: boolean, True to stop when holding the speed.
-        :speed: float, speed percent, 0~100
         :returns: void
 
         """
+
+        if ['forward', 'backward'].count(self.getMotion()) > 0 \
+            and self.getSpeed() > 20:
+            tmp = self.getSpeed()
+            while tmp > 0:
+                tmp = tmp - 20
+                if self.getMotion() == 'forward':
+                    self.forward(tmp, True)
+                elif self.getMotion() == 'backward':
+                    self.backward(tmp, True)
+                time.sleep(0.1)
 
         if self.isUltrasonicRunning():
             self.stopUltrasonic()
 
         if holdSpeed is False:
             self.setSpeed(0)
+
         self.setMotion(None)
         self.mtrL1.ChangeDutyCycle(0)
         self.mtrL2.ChangeDutyCycle(0)
