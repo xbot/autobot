@@ -142,6 +142,8 @@ class TimerThread(threading.Thread):
 
 
 def singleton(cls, *args, **kw):
+    """ Set the decorated class singleton. """
+
     instances = {}
 
     def _singleton():
@@ -165,6 +167,7 @@ class StdbyTimerThread(TimerThread):
 
 
 def timed(genre, edge=None):
+    """ Timing decorator. """
 
     def _timer(fn):
 
@@ -211,6 +214,7 @@ class Bot(object):
     _speed = 0  # The current speed.
     _motion = None  # The current motion.
     _keepUltrasonicRunning = False  # Whether to keep ultrasonic thread running.
+    _isInfraredEnabled = False  # Whether to enable infrared sensors.
     _ultrasonicThread = None  # The ultrasonic thread.
     _behavior = BEHAVIOR_NONE  # In which behavior the bot works.
     _isFrontBlocked = False  # Whether is there a barrier in the front.
@@ -223,9 +227,10 @@ class Bot(object):
             this = args[0]
             if (this.getBehavior() == this.BEHAVIOR_ANTICOLLISION
                 or this.getBehavior() == this.BEHAVIOR_AUTOMATION) \
-                and not this.isUltrasonicRunning():
+                and not this.isUltrasonicEnabled():
                 this.startUltrasonic()
-            fn(*args, **kwds)
+                this.startInfrared()
+            return fn(*args, **kwds)
 
         return wrapper
 
@@ -478,8 +483,9 @@ class Bot(object):
 
         """
 
-        if self.isUltrasonicRunning():
+        if self.isUltrasonicEnabled():
             self.stopUltrasonic()
+            self.stopInfrared()
 
         if holdSpeed is False:
             self.setSpeed(0)
@@ -563,11 +569,13 @@ class Bot(object):
 
         if behavior == self.BEHAVIOR_AUTOMATION or behavior \
             == self.BEHAVIOR_ANTICOLLISION:
-            if not self.isUltrasonicRunning():
+            if not self.isUltrasonicEnabled():
                 self.startUltrasonic()
+                self.startInfrared()
 
         if behavior == self.BEHAVIOR_NONE:
             self.stopUltrasonic()
+            self.stopInfrared()
 
     def initUltrasonicSensor(self):
         """ Initialize ultrasonic function.
@@ -633,7 +641,7 @@ class Bot(object):
 
         """
 
-        if self.isUltrasonicRunning():
+        if self.isUltrasonicEnabled():
             return
 
         def keep_checking_front():
@@ -663,7 +671,7 @@ class Bot(object):
 
         self._keepUltrasonicRunning = False
 
-    def isUltrasonicRunning(self):
+    def isUltrasonicEnabled(self):
         """ Check whether ultrasonic is running.
 
         :returns: bool
@@ -682,7 +690,8 @@ class Bot(object):
 
         def on_infrared(channel):
             if self.getBehavior() == self.BEHAVIOR_AUTOMATION \
-                and self.isUltrasonicRunning():
+                and self.isUltrasonicEnabled() \
+                and self.isInfraredEnabled():
                 states = self.getSensorStates()
                 self.actOnMyOwn(states)
 
@@ -692,6 +701,33 @@ class Bot(object):
                               callback=on_infrared)
         GPIO.add_event_detect(self.pinInfraredR, GPIO.BOTH,
                               callback=on_infrared)
+
+    def startInfrared(self):
+        """ Enable infrared sensors.
+
+        :returns: bool
+
+        """
+
+        self._isInfraredEnabled = True
+
+    def stopInfrared(self):
+        """ Disable infrared sensors.
+
+        :returns: bool
+
+        """
+
+        self._isInfraredEnabled = False
+
+    def isInfraredEnabled(self):
+        """ Whether infrared sensors are enabled.
+
+        :returns: bool
+
+        """
+
+        return self._isInfraredEnabled
 
     def getSensorStates(self):
         """ Return the states of those sensors.
