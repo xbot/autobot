@@ -16,6 +16,7 @@
     <string name="msg_emptyport">端口不能為空</string>
     <string name="msg_emptyvideoport">視頻服務端口不能為空</string>
     <string name="msg_emptyvideofps">視頻幀數不能為空</string>
+    <string name="msg_emptybtaddr">藍牙地址不能為空</string>
     <string name="btn_forward">直行</string>
     <string name="btn_backward">倒車</string>
     <string name="btn_left">左轉</string>
@@ -28,12 +29,15 @@
     <string name="hint_ipaddr">IP地址</string>
     <string name="hint_port">端口</string>
     <string name="hint_videoport">視頻服務端口</string>
+    <string name="hint_btaddr">藍牙地址</string>
     <string name="msg_currentspeed">當前速度</string>
 	<string name="msg_connected">連接已建立</string>
 	<string name="msg_connectionfailed">連接失敗</string>
 	<string name="msg_behavior_none">手動操作</string>
 	<string name="msg_behavior_anticollision">手動並防撞</string>
 	<string name="msg_behavior_automation">自主行動</string>
+	<string name="msg_btconnectionfailed">連接藍牙設備失敗</string>
+	<string name="msg_btdevicenotbonded">藍牙設備未綁定</string>
 	<string name="title_imageerror">接收視頻失敗</string>
 	<string name="btn_enablevideo">監控</string>
 	<string name="btn_disablevideo">關閉</string>

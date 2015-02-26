@@ -33,7 +33,7 @@
   	<dependency>
   		<groupId>com.loopj.android</groupId>
   		<artifactId>android-async-http</artifactId>
-  		<version>1.4.5</version>
+  		<version>1.4.6</version>
   	</dependency>
   </dependencies>
 </project>

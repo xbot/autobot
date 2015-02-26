@@ -127,6 +127,8 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 	            public void onSuccess(int statusCode, Header[] headers, JSONObject data) {
 	                try {
 	                	if (data.getInt("code") == 0) {
+	                		AutobotApplication app = (AutobotApplication)getApplication();
+	                		app.setProtocol(AutobotApplication.PROTOCOL_HTTP);
 	                		Intent itCtrl = new Intent(getApplicationContext(), ControlActivity.class);
 	                		startActivity(itCtrl);
 						} else {

@@ -42,6 +42,7 @@ import os
 import threading
 import time
 import random
+import bluetooth as bt
 
 PORT = 8000  # Listening port
 PINS = (  # GPIO pin numbers
@@ -55,6 +56,8 @@ PINS = (  # GPIO pin numbers
     3,
     )
 FRONT_SAFETY_DISTANCE = 30  # 30cm
+
+ERR_INVALID_JSON = 1 # Error code, invalid json.
 
 _lock = False  # exclusive lock
 
@@ -142,6 +145,8 @@ class TimerThread(threading.Thread):
 
 
 def singleton(cls, *args, **kw):
+    """ Set the decorated class singleton. """
+
     instances = {}
 
     def _singleton():
@@ -165,6 +170,7 @@ class StdbyTimerThread(TimerThread):
 
 
 def timed(genre, edge=None):
+    """ Timing decorator. """
 
     def _timer(fn):
 
@@ -211,6 +217,7 @@ class Bot(object):
     _speed = 0  # The current speed.
     _motion = None  # The current motion.
     _keepUltrasonicRunning = False  # Whether to keep ultrasonic thread running.
+    _isInfraredEnabled = False  # Whether to enable infrared sensors.
     _ultrasonicThread = None  # The ultrasonic thread.
     _behavior = BEHAVIOR_NONE  # In which behavior the bot works.
     _isFrontBlocked = False  # Whether is there a barrier in the front.
@@ -223,9 +230,10 @@ class Bot(object):
             this = args[0]
             if (this.getBehavior() == this.BEHAVIOR_ANTICOLLISION
                 or this.getBehavior() == this.BEHAVIOR_AUTOMATION) \
-                and not this.isUltrasonicRunning():
+                and not this.isUltrasonicEnabled():
                 this.startUltrasonic()
-            fn(*args, **kwds)
+                this.startInfrared()
+            return fn(*args, **kwds)
 
         return wrapper
 
@@ -492,8 +500,9 @@ class Bot(object):
                     self.backward(tmp, True)
                 time.sleep(0.1)
 
-        if self.isUltrasonicRunning():
+        if self.isUltrasonicEnabled():
             self.stopUltrasonic()
+            self.stopInfrared()
 
         if holdSpeed is False:
             self.setSpeed(0)
@@ -578,11 +587,13 @@ class Bot(object):
 
         if behavior == self.BEHAVIOR_AUTOMATION or behavior \
             == self.BEHAVIOR_ANTICOLLISION:
-            if not self.isUltrasonicRunning():
+            if not self.isUltrasonicEnabled():
                 self.startUltrasonic()
+                self.startInfrared()
 
         if behavior == self.BEHAVIOR_NONE:
             self.stopUltrasonic()
+            self.stopInfrared()
 
     def initUltrasonicSensor(self):
         """ Initialize ultrasonic function.
@@ -648,7 +659,7 @@ class Bot(object):
 
         """
 
-        if self.isUltrasonicRunning():
+        if self.isUltrasonicEnabled():
             return
 
         def keep_checking_front():
@@ -678,7 +689,7 @@ class Bot(object):
 
         self._keepUltrasonicRunning = False
 
-    def isUltrasonicRunning(self):
+    def isUltrasonicEnabled(self):
         """ Check whether ultrasonic is running.
 
         :returns: bool
@@ -697,7 +708,8 @@ class Bot(object):
 
         def on_infrared(channel):
             if self.getBehavior() == self.BEHAVIOR_AUTOMATION \
-                and self.isUltrasonicRunning():
+                and self.isUltrasonicEnabled() \
+                and self.isInfraredEnabled():
                 states = self.getSensorStates()
                 self.actOnMyOwn(states)
 
@@ -707,6 +719,33 @@ class Bot(object):
                               callback=on_infrared)
         GPIO.add_event_detect(self.pinInfraredR, GPIO.BOTH,
                               callback=on_infrared)
+
+    def startInfrared(self):
+        """ Enable infrared sensors.
+
+        :returns: bool
+
+        """
+
+        self._isInfraredEnabled = True
+
+    def stopInfrared(self):
+        """ Disable infrared sensors.
+
+        :returns: bool
+
+        """
+
+        self._isInfraredEnabled = False
+
+    def isInfraredEnabled(self):
+        """ Whether infrared sensors are enabled.
+
+        :returns: bool
+
+        """
+
+        return self._isInfraredEnabled
 
     def getSensorStates(self):
         """ Return the states of those sensors.
@@ -836,11 +875,60 @@ class ThreadedServer(ThreadingMixIn, BaseHTTPServer.HTTPServer):
 def main():
     httpd = ThreadedServer(('', PORT), RequestHandler)
     print 'Listening on port', PORT, ', press <Ctrl-C> to stop.'
+    httpd.serve_forever()
+
+
+@timed(TIMER_STDBY)
+def bluetoothd():
+    srvSock = bt.BluetoothSocket( bt.RFCOMM )
+    srvSock.bind(("", bt.PORT_ANY))
+    srvSock.listen(1)
+
+    port = srvSock.getsockname()[1]
+    uuid = "00001101-0000-1000-8000-00805F9B34FB"
+
+    bt.advertise_service( srvSock, "PiBTSrv",
+            service_id = uuid,
+            service_classes = [ uuid, bt.SERIAL_PORT_CLASS ],
+            profiles = [ bt.SERIAL_PORT_PROFILE ], 
+            # protocols = [ bt.OBEX_UUID ] 
+            )
+                       
     try:
-        httpd.serve_forever()
-    except KeyboardInterrupt:
-        print 'Game over.'
-    GPIO.cleanup()
+        while True:
+            print("Waiting for connection on RFCOMM channel %d" % port)
+
+            cliSock, cliInfo = srvSock.accept()
+            print("Accepted connection from ", cliInfo)
+
+            try:
+                while True:
+                    resp = {'code':0, 'msg':'', 'data':None}
+
+                    data = cliSock.recv(1024)
+                    if len(data) == 0: break
+                    print("received [%s]" % data)
+
+                    try:
+                        cmd = json.loads(data)
+                    except ValueError:
+                        resp['code'] = ERR_INVALID_JSON
+                        resp['msg'] = 'Invalid JSON.'
+                        cliSock.send(json.dumps(resp))
+            except IOError:
+                pass
+
+            print("Disconnected from ", cliInfo)
+
+            cliSock.close()
+    finally:
+        srvSock.close()
+    
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print 'Game over.'
+    finally:
+        GPIO.cleanup()

@@ -2,6 +2,7 @@ package org.x3f.autobot;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.HashMap;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -16,8 +17,6 @@ import org.json.JSONObject;
 import org.x3f.lib.ToastUtil;
 
 import com.loopj.android.http.JsonHttpResponseHandler;
-import com.loopj.android.http.RequestParams;
-
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -30,6 +29,7 @@ import android.widget.ImageButton;
 import android.widget.ToggleButton;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.content.res.Resources.NotFoundException;
 import android.graphics.Color;
@@ -50,6 +50,8 @@ public class ControlActivity extends Activity implements OnClickListener,
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_controlpanel);
+		
+		AutobotApplication app = (AutobotApplication) getApplication();
 
 		View btnForward = this.findViewById(R.id.btnForward);
 		btnForward.setOnClickListener(this);
@@ -70,14 +72,17 @@ public class ControlActivity extends Activity implements OnClickListener,
 		View btnGearDown = this.findViewById(R.id.btnGearDown);
 		btnGearDown.setOnClickListener(this);
 		View btnToggleVideo = this.findViewById(R.id.btnToggleVideo);
-		btnToggleVideo.setOnClickListener(this);
+		if (app.getBtSocket() instanceof BluetoothSocket) {
+			btnToggleVideo.setEnabled(false);
+		} else {
+			btnToggleVideo.setOnClickListener(this);
+		}
 		btnSwitchBehavior = (ImageButton) this
 				.findViewById(R.id.btnSwitchBehavior);
 		btnSwitchBehavior.setOnClickListener(this);
 
 		videoView = (MjpegView) findViewById(R.id.mv);
 		if (videoView != null) {
-			AutobotApplication app = (AutobotApplication) getApplication();
 			String[] resolution = app.getVideoResolution().split("x");
 			int width = Integer.parseInt(resolution[0]);
 			int height = Integer.parseInt(resolution[1]);
@@ -88,7 +93,7 @@ public class ControlActivity extends Activity implements OnClickListener,
 	@Override
 	public void onClick(View v) {
 		AutobotApplication app = (AutobotApplication) getApplication();
-		RequestParams params = new RequestParams();
+		HashMap<String, String> params = new HashMap<String, String>();
 
 		switch (v.getId()) {
 		case R.id.btnForward:
@@ -98,15 +103,15 @@ public class ControlActivity extends Activity implements OnClickListener,
 			app.call("backward", null);
 			break;
 		case R.id.btnStop:
-			params.add("hold", "1");
+			params.put("hold", "1");
 			app.call("stop", params);
 			break;
 		case R.id.btnGearUp:
-			params.add("speed", "+20");
+			params.put("speed", "+20");
 			app.call("vary", params);
 			break;
 		case R.id.btnGearDown:
-			params.add("speed", "-20");
+			params.put("speed", "-20");
 			app.call("vary", params);
 			break;
 		case R.id.btnToggleVideo:
@@ -114,8 +119,8 @@ public class ControlActivity extends Activity implements OnClickListener,
 			if (btn.isChecked()) {
 				// enable video
 				videoView.setBackgroundColor(Color.TRANSPARENT);
-				params.add("resolution", app.getVideoResolution());
-				params.add("fps", app.getVideoFps());
+				params.put("resolution", app.getVideoResolution());
+				params.put("fps", app.getVideoFps());
 				app.call("videoOn", params);
 				try {
 					Thread.sleep(1000);
@@ -135,15 +140,15 @@ public class ControlActivity extends Activity implements OnClickListener,
 		case R.id.btnSwitchBehavior:
 			if (app.getBehavior() == AutobotApplication.BEHAVIOR_NONE) {
 				// switch to anti-collision
-				params.add("v", String
+				params.put("v", String
 						.valueOf(AutobotApplication.BEHAVIOR_ANTICOLLISION));
 			} else if (app.getBehavior() == AutobotApplication.BEHAVIOR_ANTICOLLISION) {
 				// switch to automation
-				params.add("v",
+				params.put("v",
 						String.valueOf(AutobotApplication.BEHAVIOR_AUTOMATION));
 			} else if (app.getBehavior() == AutobotApplication.BEHAVIOR_AUTOMATION) {
 				// switch to manual
-				params.add("v",
+				params.put("v",
 						String.valueOf(AutobotApplication.BEHAVIOR_NONE));
 			}
 			app.call("behavior", params, this.getBehaviorCallback());
@@ -175,7 +180,8 @@ public class ControlActivity extends Activity implements OnClickListener,
 												getString(R.string.msg_behavior_anticollision));
 								btnSwitchBehavior
 										.setImageDrawable(getResources()
-												.getDrawable(R.drawable.avatar_gray));
+												.getDrawable(
+														R.drawable.avatar_gray));
 							} else if (behavior == AutobotApplication.BEHAVIOR_AUTOMATION) {
 								app.setBehavior(AutobotApplication.BEHAVIOR_AUTOMATION);
 								ToastUtil
@@ -192,8 +198,7 @@ public class ControlActivity extends Activity implements OnClickListener,
 										getString(R.string.msg_behavior_none));
 								btnSwitchBehavior
 										.setImageDrawable(getResources()
-												.getDrawable(
-														R.drawable.avatar));
+												.getDrawable(R.drawable.avatar));
 							}
 						} catch (NumberFormatException e) {
 							ToastUtil.showToast(getApplicationContext(),
@@ -233,14 +238,14 @@ public class ControlActivity extends Activity implements OnClickListener,
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
 		AutobotApplication app = (AutobotApplication) getApplication();
-		RequestParams params = new RequestParams();
+		HashMap<String, String> params = new HashMap<String, String>();
 		switch (v.getId()) {
 		case R.id.btnLeft:
 			if (event.getAction() == MotionEvent.ACTION_DOWN) {
 				app.call("left", params);
 			}
 			if (event.getAction() == MotionEvent.ACTION_UP) {
-				params.add("hold", "1");
+				params.put("hold", "1");
 				app.call("stop", params);
 			}
 			break;
@@ -249,7 +254,7 @@ public class ControlActivity extends Activity implements OnClickListener,
 				app.call("right", params);
 			}
 			if (event.getAction() == MotionEvent.ACTION_UP) {
-				params.add("hold", "1");
+				params.put("hold", "1");
 				app.call("stop", params);
 			}
 			break;
@@ -277,19 +282,18 @@ public class ControlActivity extends Activity implements OnClickListener,
 
 	public void onResume() {
 		super.onResume();
-		
+
 		AutobotApplication app = (AutobotApplication) getApplication();
-		
+
 		if (videoView != null) {
 			if (suspending) {
 				new DoRead().execute(app.getVideoURL());
 				suspending = false;
 			}
 		}
-		
+
 		// Fetch autobot's states
-		RequestParams params = new RequestParams();
-		app.call("connect", params, this.getBehaviorCallback());
+		app.call("connect", new HashMap<String, String>(), this.getBehaviorCallback());
 	}
 
 	public void onStart() {
@@ -313,6 +317,16 @@ public class ControlActivity extends Activity implements OnClickListener,
 	public void onDestroy() {
 		if (videoView != null) {
 			videoView.freeCameraMemory();
+		}
+		// Close BT socket if it is connected
+		AutobotApplication app = (AutobotApplication) getApplication();
+		if (app.getBtSocket() instanceof BluetoothSocket
+				&& app.getBtSocket().isConnected()) {
+			try {
+				app.getBtSocket().close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 
 		super.onDestroy();
