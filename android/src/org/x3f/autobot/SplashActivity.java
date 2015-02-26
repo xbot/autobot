@@ -24,7 +24,7 @@ public class SplashActivity extends Activity {
 			@Override
 			public void run() {
 				Intent mainIntent = new Intent(SplashActivity.this,
-						MainActivity.class);
+						BluetoothActivity.class);
 				startActivity(mainIntent);
 				finish();
 			}

@@ -6,9 +6,11 @@
     android:installLocation="preferExternal" >
 
     <uses-sdk
-        android:minSdkVersion="8"
+        android:minSdkVersion="14"
         android:targetSdkVersion="20" />
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+	<uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
 
     <application
         android:name=".AutobotApplication"
@@ -17,6 +19,10 @@
         android:label="@string/app_name" >
         <activity
             android:name="org.x3f.autobot.MainActivity"
+            android:label="@string/app_name" >
+        </activity>
+        <activity
+            android:name="org.x3f.autobot.BluetoothActivity"
             android:label="@string/app_name" >
         </activity>
         <activity

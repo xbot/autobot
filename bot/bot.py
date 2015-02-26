@@ -42,6 +42,7 @@ import os
 import threading
 import time
 import random
+import bluetooth as bt
 
 PORT = 8000  # Listening port
 PINS = (  # GPIO pin numbers
@@ -55,6 +56,8 @@ PINS = (  # GPIO pin numbers
     3,
     )
 FRONT_SAFETY_DISTANCE = 30  # 30cm
+
+ERR_INVALID_JSON = 1 # Error code, invalid json.
 
 _lock = False  # exclusive lock
 
@@ -857,11 +860,60 @@ class ThreadedServer(ThreadingMixIn, BaseHTTPServer.HTTPServer):
 def main():
     httpd = ThreadedServer(('', PORT), RequestHandler)
     print 'Listening on port', PORT, ', press <Ctrl-C> to stop.'
+    httpd.serve_forever()
+
+
+@timed(TIMER_STDBY)
+def bluetoothd():
+    srvSock = bt.BluetoothSocket( bt.RFCOMM )
+    srvSock.bind(("", bt.PORT_ANY))
+    srvSock.listen(1)
+
+    port = srvSock.getsockname()[1]
+    uuid = "00001101-0000-1000-8000-00805F9B34FB"
+
+    bt.advertise_service( srvSock, "PiBTSrv",
+            service_id = uuid,
+            service_classes = [ uuid, bt.SERIAL_PORT_CLASS ],
+            profiles = [ bt.SERIAL_PORT_PROFILE ], 
+            # protocols = [ bt.OBEX_UUID ] 
+            )
+                       
     try:
-        httpd.serve_forever()
-    except KeyboardInterrupt:
-        print 'Game over.'
-    GPIO.cleanup()
+        while True:
+            print("Waiting for connection on RFCOMM channel %d" % port)
+
+            cliSock, cliInfo = srvSock.accept()
+            print("Accepted connection from ", cliInfo)
+
+            try:
+                while True:
+                    resp = {'code':0, 'msg':'', 'data':None}
+
+                    data = cliSock.recv(1024)
+                    if len(data) == 0: break
+                    print("received [%s]" % data)
+
+                    try:
+                        cmd = json.loads(data)
+                    except ValueError:
+                        resp['code'] = ERR_INVALID_JSON
+                        resp['msg'] = 'Invalid JSON.'
+                        cliSock.send(json.dumps(resp))
+            except IOError:
+                pass
+
+            print("Disconnected from ", cliInfo)
+
+            cliSock.close()
+    finally:
+        srvSock.close()
+    
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print 'Game over.'
+    finally:
+        GPIO.cleanup()
