@@ -1,6 +1,7 @@
 package org.x3f.autobot;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.HashMap;
 
@@ -17,6 +18,7 @@ import org.json.JSONObject;
 import org.x3f.lib.ToastUtil;
 
 import com.loopj.android.http.JsonHttpResponseHandler;
+
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -37,10 +39,12 @@ import android.graphics.Color;
 public class ControlActivity extends Activity implements OnClickListener,
 		OnTouchListener {
 
-	private static final String TAG = "AUTOBOT";
+	private static final String TAG = "ControlActivity";
 
 	private MjpegView videoView = null;
 	private ImageButton btnSwitchBehavior = null;
+	
+	private Thread btThread = null;
 
 	private static boolean suspending = false;
 
@@ -51,8 +55,8 @@ public class ControlActivity extends Activity implements OnClickListener,
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_controlpanel);
 		
-		AutobotApplication app = (AutobotApplication) getApplication();
-
+		final AutobotApplication app = (AutobotApplication) getApplication();
+		
 		View btnForward = this.findViewById(R.id.btnForward);
 		btnForward.setOnClickListener(this);
 		View btnBackward = this.findViewById(R.id.btnBackward);
@@ -88,12 +92,57 @@ public class ControlActivity extends Activity implements OnClickListener,
 			int height = Integer.parseInt(resolution[1]);
 			videoView.setResolution(width, height);
 		}
+		
+		// Start a thread to listen on bluetooth responses
+		if (app.getProtocol() == AutobotApplication.PROTOCOL_BT) {
+			btThread = new Thread(new Runnable() {
+
+				@Override
+				public void run() {
+					try {
+						InputStream inStream = app.getBtSocket().getInputStream();
+						byte[] buffer = new byte[4096];
+						while (!Thread.currentThread().isInterrupted()) {
+							Log.e(TAG, "dummy ...");
+							try {
+								int bytes = inStream.read(buffer);
+								byte[] newBuffer = new byte[bytes];
+								System.arraycopy(buffer, 0, newBuffer, 0, bytes);
+								Log.e(TAG, new String(newBuffer));
+								JSONObject response = new JSONObject(new String(
+										newBuffer));
+								if (response.has("code")
+										&& response.getInt("code") == 0) {
+//									mHandler.obtainMessage(MSG_CONNECTED, btSocket)
+//											.sendToTarget();
+								} else {
+//									mHandler.obtainMessage(MSG_NOT_CONNECTED)
+//											.sendToTarget();
+								}
+							} catch (IOException e) {
+								// TODO finish this
+								e.printStackTrace();
+							} catch (JSONException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+						inStream.close();
+					} catch (IOException e1) {
+						e1.printStackTrace();
+						// TODO finish this
+					}
+					Log.e(TAG, "thread killed ...");
+				}
+			});
+			btThread.start();
+		}
 	}
 
 	@Override
 	public void onClick(View v) {
-		AutobotApplication app = (AutobotApplication) getApplication();
 		HashMap<String, String> params = new HashMap<String, String>();
+		AutobotApplication app = (AutobotApplication) getApplication();
 
 		switch (v.getId()) {
 		case R.id.btnForward:
@@ -282,7 +331,6 @@ public class ControlActivity extends Activity implements OnClickListener,
 
 	public void onResume() {
 		super.onResume();
-
 		AutobotApplication app = (AutobotApplication) getApplication();
 
 		if (videoView != null) {
@@ -315,11 +363,11 @@ public class ControlActivity extends Activity implements OnClickListener,
 	}
 
 	public void onDestroy() {
+		AutobotApplication app = (AutobotApplication) getApplication();
 		if (videoView != null) {
 			videoView.freeCameraMemory();
 		}
 		// Close BT socket if it is connected
-		AutobotApplication app = (AutobotApplication) getApplication();
 		if (app.getBtSocket() instanceof BluetoothSocket
 				&& app.getBtSocket().isConnected()) {
 			try {
@@ -327,6 +375,10 @@ public class ControlActivity extends Activity implements OnClickListener,
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		}
+		// Close BT thread if it is running
+		if (btThread != null && btThread.isAlive()) {
+			btThread.interrupt();
 		}
 
 		super.onDestroy();

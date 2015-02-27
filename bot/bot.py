@@ -911,6 +911,9 @@ def bluetoothd():
 
                     try:
                         cmd = json.loads(data)
+
+                        if cmd['command'] == 'connect':
+                            cliSock.send(json.dumps(resp))
                     except ValueError:
                         resp['code'] = ERR_INVALID_JSON
                         resp['msg'] = 'Invalid JSON.'

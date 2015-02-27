@@ -38,6 +38,9 @@
 	<string name="msg_behavior_automation">自主行動</string>
 	<string name="msg_btconnectionfailed">連接藍牙設備失敗</string>
 	<string name="msg_btdevicenotbonded">藍牙設備未綁定</string>
+	<string name="msg_requesttimeout">請求超時</string>
+	<string name="msg_invalidjson">JSON數據非法</string>
+	<string name="msg_socketnotconnected">Socket未連接</string>
 	<string name="title_imageerror">接收視頻失敗</string>
 	<string name="btn_enablevideo">監控</string>
 	<string name="btn_disablevideo">關閉</string>

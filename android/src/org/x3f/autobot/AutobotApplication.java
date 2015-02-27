@@ -1,5 +1,7 @@
 package org.x3f.autobot;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.HashMap;
 
 import org.apache.http.Header;
@@ -9,12 +11,14 @@ import org.json.JSONObject;
 import org.x3f.lib.RestClient;
 import org.x3f.lib.ToastUtil;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 
 import android.app.Application;
 import android.bluetooth.BluetoothSocket;
 import android.content.res.Resources.NotFoundException;
+import android.util.Log;
 
 public class AutobotApplication extends Application {
 	private String ip;
@@ -22,7 +26,6 @@ public class AutobotApplication extends Application {
 	private String videoPort;
 	private String videoResolution;
 	private String videoFps;
-	private String btAddr;
 	private int behavior;
 	private BluetoothSocket btSocket;
 	private int protocol;
@@ -80,14 +83,6 @@ public class AutobotApplication extends Application {
 		this.behavior = behavior;
 	}
 
-	public String getBtAddr() {
-		return btAddr;
-	}
-
-	public void setBtAddr(String btAddr) {
-		this.btAddr = btAddr;
-	}
-
 	public BluetoothSocket getBtSocket() {
 		return btSocket;
 	}
@@ -113,13 +108,24 @@ public class AutobotApplication extends Application {
         setVideoResolution("160x120");
         setVideoFps("30");
         setBehavior(BEHAVIOR_NONE);
-        setBtAddr("00:15:83:0C:BF:EB");
         setProtocol(PROTOCOL_BT);
     }
 	
 	public void call(String command, HashMap<String, String> params) {
 		if (getProtocol() == PROTOCOL_BT) {
 			// TODO 用蓝牙
+			try {
+				OutputStream outStream = btSocket.getOutputStream();
+				HashMap<String, Object> request = new HashMap<String, Object>();
+				request.put("command", command);
+				request.put("params", params);
+				ObjectMapper om = new ObjectMapper();
+				String json = om.writeValueAsString(request);
+				outStream.write(json.getBytes());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		} else {
 			RequestParams rp = new RequestParams(params);
 			RestClient.get("http://" + getIp() + ":" + getPort() + "/" + command, rp, new JsonHttpResponseHandler() {

@@ -64,7 +64,6 @@ public final class R {
         public static final int content=0x7f090000;
         public static final int copyright_author=0x7f090018;
         public static final int copyright_product=0x7f090019;
-        public static final int editBTAddr=0x7f090001;
         public static final int editFps=0x7f090013;
         public static final int editIP=0x7f09000f;
         public static final int editPort=0x7f090010;
@@ -72,6 +71,7 @@ public final class R {
         public static final int linearLayout1=0x7f090017;
         public static final int menu_settings=0x7f09001a;
         public static final int mv=0x7f090003;
+        public static final int spinBondedDevices=0x7f090001;
         public static final int spinRslv=0x7f090012;
     }
     public static final class layout {
@@ -99,8 +99,8 @@ public final class R {
         public static final int btn_adjleft=0x7f060013;
         public static final int btn_adjright=0x7f060014;
         public static final int btn_backward=0x7f060010;
-        public static final int btn_disablevideo=0x7f060026;
-        public static final int btn_enablevideo=0x7f060025;
+        public static final int btn_disablevideo=0x7f060029;
+        public static final int btn_enablevideo=0x7f060028;
         public static final int btn_forward=0x7f06000f;
         public static final int btn_geardown=0x7f060017;
         public static final int btn_gearup=0x7f060016;
@@ -111,7 +111,7 @@ public final class R {
         public static final int hint_ipaddr=0x7f060018;
         public static final int hint_port=0x7f060019;
         public static final int hint_videoport=0x7f06001a;
-        public static final int img_avatar=0x7f060027;
+        public static final int img_avatar=0x7f06002a;
         public static final int label_about=0x7f060006;
         public static final int menu_settings=0x7f060007;
         public static final int msg_behavior_anticollision=0x7f060020;
@@ -127,8 +127,11 @@ public final class R {
         public static final int msg_emptyport=0x7f06000b;
         public static final int msg_emptyvideofps=0x7f06000d;
         public static final int msg_emptyvideoport=0x7f06000c;
+        public static final int msg_invalidjson=0x7f060025;
         public static final int msg_quit=0x7f060008;
-        public static final int title_imageerror=0x7f060024;
+        public static final int msg_requesttimeout=0x7f060024;
+        public static final int msg_socketnotconnected=0x7f060026;
+        public static final int title_imageerror=0x7f060027;
     }
     public static final class style {
         /** 
