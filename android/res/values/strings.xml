@@ -3,14 +3,15 @@
 
     <!-- Titles -->
     <string name="app_name">軒轅之鼓</string>
-    <string name="app_desc">4WD機器人遙控器</string>
+    <string name="app_desc">輪式智能機器人客戶端</string>
     <string name="app_author">淘氣</string>
-    <string name="about_title">4WD機器人遙控器</string>
-    <string name="app_version">v2.2</string>
-    <string name="about_content">版本：2.2\n發布：2015.02.16\n作者：淘氣\n電郵：donie.leigh@gmail.com</string>
+    <string name="about_title">輪式智能機器人客戶端</string>
+    <string name="app_version">v3.0</string>
+    <string name="about_content">版本：3.0\n發布：2015.02.28\n作者：淘氣\n電郵：donie.leigh@gmail.com</string>
     <string name="label_about">關於</string>
     <string name="label_bluetooth">藍牙</string>
-    <string name="label_wifi">Wifi</string>
+    <string name="label_wifi">WiFi</string>
+    <string name="label_product">一下</string>
     <string name="menu_settings">設置</string>
     <string name="msg_quit">再按一次退出應用</string>
     <string name="app_connect">連接</string>

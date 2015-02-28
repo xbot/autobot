@@ -13,6 +13,7 @@
         android:orientation="vertical" >
 
         <ImageView
+            android:contentDescription="@string/img_avatar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -79,7 +80,7 @@
             android:id="@+id/copyright_product"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="一下"
+            android:text="@string/label_product"
             android:textSize="11sp" />
     </LinearLayout>
 

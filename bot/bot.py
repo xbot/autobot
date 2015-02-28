@@ -876,36 +876,37 @@ class ThreadedServer(ThreadingMixIn, BaseHTTPServer.HTTPServer):
 
 
 @timed(TIMER_STDBY)
-def main():
-    httpd = ThreadedServer(('', PORT), RequestHandler)
-    print 'Listening on port', PORT, ', press <Ctrl-C> to stop.'
-    httpd.serve_forever()
+def httpd():
+    threadName = '@' + threading.currentThread().getName() + ':'
+    print threadName, 'Listening on port', PORT, ', press <Ctrl-C> to stop.'
+    srv = ThreadedServer(('', PORT), RequestHandler)
+    srv.serve_forever()
 
 
 @timed(TIMER_STDBY)
 def bluetoothd():
-    srvSock = bt.BluetoothSocket( bt.RFCOMM )
+    srvSock = bt.BluetoothSocket(bt.RFCOMM)
     srvSock.bind(("", bt.PORT_ANY))
     srvSock.listen(1)
 
+    threadName = '@' + threading.currentThread().getName() + ':'
     port = srvSock.getsockname()[1]
     uuid = "00001101-0000-1000-8000-00805F9B34FB"
 
-    bt.advertise_service( srvSock, "PiBTSrv",
-            service_id = uuid,
-            service_classes = [ uuid, bt.SERIAL_PORT_CLASS ],
-            profiles = [ bt.SERIAL_PORT_PROFILE ], 
-            # protocols = [ bt.OBEX_UUID ] 
-            )
+    bt.advertise_service(srvSock, "PiBTSrv",
+        service_id = uuid,
+        service_classes = [uuid, bt.SERIAL_PORT_CLASS],
+        profiles = [bt.SERIAL_PORT_PROFILE],
+    )
 
     bot = Bot(PINS)
                        
     try:
         while True:
-            print("Waiting for connection on RFCOMM channel %d" % port)
+            print threadName, "Waiting for connection on RFCOMM channel %d" % port
 
             cliSock, cliInfo = srvSock.accept()
-            print("Accepted connection from ", cliInfo)
+            print threadName, "Accepted connection from ", cliInfo
 
             try:
                 while True:
@@ -913,7 +914,7 @@ def bluetoothd():
 
                     data = cliSock.recv(1024)
                     if len(data) == 0: break
-                    print("received [%s]" % data)
+                    print threadName, "Received [%s]" % data
 
                     try:
                         cmd = json.loads(data)
@@ -937,16 +938,29 @@ def bluetoothd():
             except IOError:
                 pass
 
-            print("Disconnected from ", cliInfo)
+            print threadName, "Disconnected from ", cliInfo
 
             cliSock.close()
     finally:
         srvSock.close()
     
 
+@timed(TIMER_STDBY)
+def both():
+    t1 = threading.Thread(target=bluetoothd, name='Bluetoothd')
+    t1.daemon = True
+    t1.start()
+    t2 = threading.Thread(target=httpd, name='Httpd')
+    t2.daemon = True
+    t2.start()
+    while True:
+        time.sleep(60)
+
+
 if __name__ == '__main__':
     try:
-        # main()
+        # both()
+        # httpd()
         bluetoothd()
     except KeyboardInterrupt:
         print 'Game over.'

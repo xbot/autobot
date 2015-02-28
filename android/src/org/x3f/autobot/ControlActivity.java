@@ -392,10 +392,6 @@ public class ControlActivity extends Activity implements OnClickListener,
 		}
 	}
 
-	public void onStart() {
-		super.onStart();
-	}
-
 	public void onPause() {
 		super.onPause();
 		if (videoView != null) {
