@@ -68,6 +68,12 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
     			Intent settings_intent = new Intent(this, AboutActivity.class);
     			startActivity(settings_intent);
     			return true;
+    		case R.id.bluetooth:
+    			Intent bluetooth_intent = new Intent(this, BluetoothActivity.class);
+    			bluetooth_intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+    			startActivity(bluetooth_intent);
+    			finish();
+    			return true;
     	}
     	return false;
     }

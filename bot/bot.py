@@ -281,7 +281,7 @@ class Bot(object):
 
         :command: string, command name.
         :params: array, parameters for the command above.
-        :returns: void
+        :returns: dict, return a dict or None.
 
         """
 
@@ -295,15 +295,19 @@ class Bot(object):
 
             """
 
-            return type(params) == types.DictType \
-                and params.has_key(key) and type(params[key]) \
-                == types.ListType and len(params[key]) > 0 \
-                and params[key][0] or defaultValue
+            if type(params) == types.DictType \
+                    and params.has_key(key):
+                        if type(params[key]) == types.ListType and len(params[key]) > 0:
+                            return params[key][0]
+                        return params[key]
+            return defaultValue
 
         if type(command) != types.StringType:
             raise TypeError('Parameter \'command\' should be a string.')
         if type(params) != types.DictType and params is not None:
             raise TypeError('Parameter \'params\' should be a dict.')
+
+        result = {'command':command, 'speed':None}
 
         speed = GetParam(params, 'speed', None)
         if command == 'forward':
@@ -341,9 +345,11 @@ class Bot(object):
             behavior = GetParam(params, 'v')
             if behavior is not None and behavior.isdigit():
                 self.setBehavior(int(behavior))
-            return self.getBehavior()
+            result['behavior'] = self.getBehavior()
         else:
             raise Exception('Unknown command ' + command)
+
+        return result
 
     @resume_behavior
     @timed(TIMER_MOTOR, 0)
@@ -851,13 +857,11 @@ class RequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         params = urlparse.parse_qs(pathInfo.query, True)
 
         if command == 'connect':
-            response['data'] = self.bot.getBehavior()
+            response['data'] = {'command':'connect', 'behavior':self.bot.getBehavior()}
             return response
 
         try:
             response['data'] = self.bot.do(command, params)
-            if response['data'] is None:
-                response['data'] = self.bot.getSpeed()
         except Exception, e:
             response['code'] = 1
             response['msg'] = str(e)
@@ -893,6 +897,8 @@ def bluetoothd():
             profiles = [ bt.SERIAL_PORT_PROFILE ], 
             # protocols = [ bt.OBEX_UUID ] 
             )
+
+    bot = Bot(PINS)
                        
     try:
         while True:
@@ -913,11 +919,21 @@ def bluetoothd():
                         cmd = json.loads(data)
 
                         if cmd['command'] == 'connect':
-                            cliSock.send(json.dumps(resp))
+                            resp['data'] = {
+                                'command':'connect',
+                                'behavior':bot.getBehavior()
+                            }
+                        else:
+                            try:
+                                resp['data'] = bot.do(cmd['command'], cmd['params'])
+                            except Exception, e:
+                                resp['code'] = 1
+                                resp['msg'] = str(e)
                     except ValueError:
                         resp['code'] = ERR_INVALID_JSON
                         resp['msg'] = 'Invalid JSON.'
-                        cliSock.send(json.dumps(resp))
+
+                    cliSock.send(json.dumps(resp))
             except IOError:
                 pass
 
@@ -930,7 +946,8 @@ def bluetoothd():
 
 if __name__ == '__main__':
     try:
-        main()
+        # main()
+        bluetoothd()
     except KeyboardInterrupt:
         print 'Game over.'
     finally:

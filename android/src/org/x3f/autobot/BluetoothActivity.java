@@ -103,7 +103,6 @@ public class BluetoothActivity extends FragmentActivity implements
 			public void run() {
 				int counter = 0;
 				while (counter < 30 && btAdapter.getBondedDevices().size() <= 0) {
-					Log.e(TAG, "counter:" + String.valueOf(counter));
 					counter++;
 					try {
 						Thread.sleep(100);
@@ -127,7 +126,7 @@ public class BluetoothActivity extends FragmentActivity implements
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.activity_main, menu);
+		getMenuInflater().inflate(R.menu.activity_bluetooth, menu);
 		return true;
 	}
 
@@ -137,6 +136,12 @@ public class BluetoothActivity extends FragmentActivity implements
 		case R.id.about:
 			Intent settings_intent = new Intent(this, AboutActivity.class);
 			startActivity(settings_intent);
+			return true;
+		case R.id.wifi:
+			Intent main_intent = new Intent(this, MainActivity.class);
+			main_intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(main_intent);
+			finish();
 			return true;
 		}
 		return false;
@@ -152,10 +157,7 @@ public class BluetoothActivity extends FragmentActivity implements
 						.show();
 				exitTime = System.currentTimeMillis();
 			} else {
-				// Disable BT service.
-				btAdapter.disable();
 				finish();
-				System.exit(0);
 			}
 			return true;
 		}
@@ -249,5 +251,13 @@ public class BluetoothActivity extends FragmentActivity implements
 			ToastUtil.showToast(getApplicationContext(),
 					getString(R.string.msg_socketnotconnected));
 		}
+	}
+	
+	@Override
+	public void onDestroy() {
+		// Disable BT service.
+		btAdapter.disable();
+		
+		super.onDestroy();
 	}
 }

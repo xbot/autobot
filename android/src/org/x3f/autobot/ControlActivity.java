@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.HashMap;
-
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -22,6 +21,7 @@ import com.loopj.android.http.JsonHttpResponseHandler;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -43,20 +43,78 @@ public class ControlActivity extends Activity implements OnClickListener,
 
 	private MjpegView videoView = null;
 	private ImageButton btnSwitchBehavior = null;
-	
+
 	private Thread btThread = null;
 
 	private static boolean suspending = false;
 
-	final Handler handler = new Handler();
+	private static final int MSG_SHOW_TOAST = 1;
+	private static final int MSG_DATA_RECEIVED = 2;
+
+	@SuppressLint("HandlerLeak")
+	private Handler mHandler = new Handler() {
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+			case MSG_SHOW_TOAST:
+				ToastUtil.showToast(getApplicationContext(), (String) msg.obj);
+				break;
+			case MSG_DATA_RECEIVED:
+				AutobotApplication app = (AutobotApplication) getApplication();
+				JSONObject data = (JSONObject) msg.obj;
+				try {
+					String command = data.getString("command");
+					// On response of command 'connect'
+					if (command.equals("connect") || command.equals("behavior")) {
+						int behavior = data.getInt("behavior");
+						if (behavior == AutobotApplication.BEHAVIOR_ANTICOLLISION) {
+							app.setBehavior(AutobotApplication.BEHAVIOR_ANTICOLLISION);
+							ToastUtil
+									.showToast(
+											getApplicationContext(),
+											getString(R.string.msg_behavior_anticollision));
+							btnSwitchBehavior.setImageDrawable(getResources()
+									.getDrawable(R.drawable.avatar_gray));
+						} else if (behavior == AutobotApplication.BEHAVIOR_AUTOMATION) {
+							app.setBehavior(AutobotApplication.BEHAVIOR_AUTOMATION);
+							ToastUtil
+									.showToast(
+											getApplicationContext(),
+											getString(R.string.msg_behavior_automation));
+							btnSwitchBehavior.setImageDrawable(getResources()
+									.getDrawable(R.drawable.avatar_red));
+						} else if (behavior == AutobotApplication.BEHAVIOR_NONE) {
+							app.setBehavior(AutobotApplication.BEHAVIOR_NONE);
+							ToastUtil.showToast(getApplicationContext(),
+									getString(R.string.msg_behavior_none));
+							btnSwitchBehavior.setImageDrawable(getResources()
+									.getDrawable(R.drawable.avatar));
+						}
+					} else {
+						// Show the current speed
+						if (data.has("speed") && !data.isNull("speed")) {
+							ToastUtil.showToast(getApplicationContext(),
+									getString(R.string.msg_currentspeed) + ": "
+											+ data.getString("speed") + "%");
+						}
+					}
+				} catch (JSONException e) {
+					Log.e(TAG, "Invalid json: " + e.getMessage());
+					e.printStackTrace();
+					ToastUtil.showToast(getApplicationContext(),
+							getString(R.string.msg_invalidjson));
+				}
+				break;
+			}
+		}
+	};
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_controlpanel);
-		
+
 		final AutobotApplication app = (AutobotApplication) getApplication();
-		
+
 		View btnForward = this.findViewById(R.id.btnForward);
 		btnForward.setOnClickListener(this);
 		View btnBackward = this.findViewById(R.id.btnBackward);
@@ -92,47 +150,60 @@ public class ControlActivity extends Activity implements OnClickListener,
 			int height = Integer.parseInt(resolution[1]);
 			videoView.setResolution(width, height);
 		}
-		
+
 		// Start a thread to listen on bluetooth responses
 		if (app.getProtocol() == AutobotApplication.PROTOCOL_BT) {
 			btThread = new Thread(new Runnable() {
 
 				@Override
 				public void run() {
+					Log.d(TAG, "Establishing bluetooth listening thread.");
 					try {
-						InputStream inStream = app.getBtSocket().getInputStream();
+						InputStream inStream = app.getBtSocket()
+								.getInputStream();
 						byte[] buffer = new byte[4096];
 						while (!Thread.currentThread().isInterrupted()) {
-							Log.e(TAG, "dummy ...");
+							Log.d(TAG, "Waiting for new bluetooth requests ...");
 							try {
 								int bytes = inStream.read(buffer);
 								byte[] newBuffer = new byte[bytes];
 								System.arraycopy(buffer, 0, newBuffer, 0, bytes);
-								Log.e(TAG, new String(newBuffer));
-								JSONObject response = new JSONObject(new String(
-										newBuffer));
+								Log.d(TAG, "Got bluetooth request: "
+										+ new String(newBuffer));
+								JSONObject response = new JSONObject(
+										new String(newBuffer));
 								if (response.has("code")
 										&& response.getInt("code") == 0) {
-//									mHandler.obtainMessage(MSG_CONNECTED, btSocket)
-//											.sendToTarget();
+									JSONObject data = response
+											.getJSONObject("data");
+									mHandler.obtainMessage(MSG_DATA_RECEIVED,
+											data).sendToTarget();
 								} else {
-//									mHandler.obtainMessage(MSG_NOT_CONNECTED)
-//											.sendToTarget();
+									mHandler.obtainMessage(MSG_SHOW_TOAST,
+											response.getString("msg"))
+											.sendToTarget();
 								}
 							} catch (IOException e) {
-								// TODO finish this
+								Log.e(TAG, "" + e.getMessage());
 								e.printStackTrace();
+								// mHandler.obtainMessage(MSG_SHOW_TOAST,
+								// e.getMessage()).sendToTarget();
 							} catch (JSONException e) {
-								// TODO Auto-generated catch block
+								Log.e(TAG, "Invalid JSON: " + e.getMessage());
 								e.printStackTrace();
+								mHandler.obtainMessage(MSG_SHOW_TOAST,
+										e.getMessage()).sendToTarget();
 							}
 						}
 						inStream.close();
 					} catch (IOException e1) {
+						Log.e(TAG, "Bluetooth listening thread io exception: "
+								+ e1.getMessage());
 						e1.printStackTrace();
-						// TODO finish this
+						mHandler.obtainMessage(MSG_SHOW_TOAST, e1.getMessage())
+								.sendToTarget();
 					}
-					Log.e(TAG, "thread killed ...");
+					Log.d(TAG, "Bluetooth listening thread exits.");
 				}
 			});
 			btThread.start();
@@ -174,6 +245,7 @@ public class ControlActivity extends Activity implements OnClickListener,
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
+					Log.e(TAG, "Interrupted while waiting video service to start.");
 					e.printStackTrace();
 				}
 				if (!videoView.isStreaming()) {
@@ -200,7 +272,11 @@ public class ControlActivity extends Activity implements OnClickListener,
 				params.put("v",
 						String.valueOf(AutobotApplication.BEHAVIOR_NONE));
 			}
-			app.call("behavior", params, this.getBehaviorCallback());
+			if (app.getProtocol() == AutobotApplication.PROTOCOL_BT) {
+				app.call("behavior", params);
+			} else {
+				app.call("behavior", params, this.getBehaviorCallback());
+			}
 			break;
 		default:
 			break;
@@ -212,47 +288,13 @@ public class ControlActivity extends Activity implements OnClickListener,
 			@Override
 			public void onSuccess(int statusCode, Header[] headers,
 					JSONObject data) {
-				AutobotApplication app = (AutobotApplication) getApplication();
 				try {
 					if (data.getInt("code") != 0) {
 						ToastUtil.showToast(getApplicationContext(),
 								data.getString("msg"));
 					} else {
-						try {
-							int behavior = Integer.parseInt(data
-									.getString("data"));
-							if (behavior == AutobotApplication.BEHAVIOR_ANTICOLLISION) {
-								app.setBehavior(AutobotApplication.BEHAVIOR_ANTICOLLISION);
-								ToastUtil
-										.showToast(
-												getApplicationContext(),
-												getString(R.string.msg_behavior_anticollision));
-								btnSwitchBehavior
-										.setImageDrawable(getResources()
-												.getDrawable(
-														R.drawable.avatar_gray));
-							} else if (behavior == AutobotApplication.BEHAVIOR_AUTOMATION) {
-								app.setBehavior(AutobotApplication.BEHAVIOR_AUTOMATION);
-								ToastUtil
-										.showToast(
-												getApplicationContext(),
-												getString(R.string.msg_behavior_automation));
-								btnSwitchBehavior
-										.setImageDrawable(getResources()
-												.getDrawable(
-														R.drawable.avatar_red));
-							} else if (behavior == AutobotApplication.BEHAVIOR_NONE) {
-								app.setBehavior(AutobotApplication.BEHAVIOR_NONE);
-								ToastUtil.showToast(getApplicationContext(),
-										getString(R.string.msg_behavior_none));
-								btnSwitchBehavior
-										.setImageDrawable(getResources()
-												.getDrawable(R.drawable.avatar));
-							}
-						} catch (NumberFormatException e) {
-							ToastUtil.showToast(getApplicationContext(),
-									data.getString("msg"));
-						}
+						mHandler.obtainMessage(MSG_DATA_RECEIVED,
+								data.getJSONObject("data")).sendToTarget();
 					}
 				} catch (NotFoundException e) {
 					ToastUtil
@@ -331,6 +373,7 @@ public class ControlActivity extends Activity implements OnClickListener,
 
 	public void onResume() {
 		super.onResume();
+		
 		AutobotApplication app = (AutobotApplication) getApplication();
 
 		if (videoView != null) {
@@ -341,7 +384,12 @@ public class ControlActivity extends Activity implements OnClickListener,
 		}
 
 		// Fetch autobot's states
-		app.call("connect", new HashMap<String, String>(), this.getBehaviorCallback());
+		if (app.getProtocol() == AutobotApplication.PROTOCOL_BT) {
+			app.call("connect", new HashMap<String, String>());
+		} else {
+			app.call("connect", new HashMap<String, String>(),
+					this.getBehaviorCallback());
+		}
 	}
 
 	public void onStart() {
@@ -356,10 +404,6 @@ public class ControlActivity extends Activity implements OnClickListener,
 				suspending = true;
 			}
 		}
-	}
-
-	public void onStop() {
-		super.onStop();
 	}
 
 	public void onDestroy() {
@@ -385,21 +429,13 @@ public class ControlActivity extends Activity implements OnClickListener,
 	}
 
 	public void setImageError() {
-		handler.post(new Runnable() {
-			@Override
-			public void run() {
-				ToastUtil.showToast(getApplicationContext(),
-						getString(R.string.title_imageerror));
-				return;
-			}
-		});
+		mHandler.obtainMessage(MSG_SHOW_TOAST,
+				getString(R.string.title_imageerror)).sendToTarget();
 	}
 
 	public class DoRead extends AsyncTask<String, Void, MjpegInputStream> {
 
 		protected MjpegInputStream doInBackground(String... url) {
-			// TODO: if camera has authentication deal with it and don't just
-			// not work
 			HttpResponse res = null;
 			DefaultHttpClient httpclient = new DefaultHttpClient();
 			HttpParams httpParams = httpclient.getParams();

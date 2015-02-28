@@ -4,8 +4,8 @@
 <!--           android:title="@string/menu_settings" -->
 <!--           android:icon="@android:drawable/ic_menu_preferences"/> -->
     
-    <item android:id="@+id/bluetooth"
-          android:title="@string/label_bluetooth"
+    <item android:id="@+id/wifi"
+          android:title="@string/label_wifi"
           android:icon="@android:drawable/ic_menu_preferences"/>
     
     <item android:id="@+id/about"

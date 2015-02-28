@@ -21,6 +21,9 @@ import android.content.res.Resources.NotFoundException;
 import android.util.Log;
 
 public class AutobotApplication extends Application {
+
+	private static final String TAG = "AutobotApplication";
+
 	private String ip;
 	private String port;
 	private String videoPort;
@@ -34,7 +37,7 @@ public class AutobotApplication extends Application {
 	public static int BEHAVIOR_AUTOMATION = 2;
 	public static int PROTOCOL_HTTP = 1;
 	public static int PROTOCOL_BT = 2;
-	
+
 	public String getIp() {
 		return ip;
 	}
@@ -50,7 +53,7 @@ public class AutobotApplication extends Application {
 	public void setPort(String port) {
 		this.port = port;
 	}
-	
+
 	public String getVideoPort() {
 		return videoPort;
 	}
@@ -99,21 +102,21 @@ public class AutobotApplication extends Application {
 		this.protocol = protocol;
 	}
 
-	@Override  
-    public void onCreate() {
-        super.onCreate();  
-        setIp("10.0.0.1");
-        setPort("8000");
-        setVideoPort("8080");
-        setVideoResolution("160x120");
-        setVideoFps("30");
-        setBehavior(BEHAVIOR_NONE);
-        setProtocol(PROTOCOL_BT);
-    }
-	
+	@Override
+	public void onCreate() {
+		super.onCreate();
+		setIp("10.0.0.1");
+		setPort("8000");
+		setVideoPort("8080");
+		setVideoResolution("160x120");
+		setVideoFps("30");
+		setBehavior(BEHAVIOR_NONE);
+		setProtocol(PROTOCOL_BT);
+	}
+
 	public void call(String command, HashMap<String, String> params) {
+		// Call server by bluetooth
 		if (getProtocol() == PROTOCOL_BT) {
-			// TODO 用蓝牙
 			try {
 				OutputStream outStream = btSocket.getOutputStream();
 				HashMap<String, Object> request = new HashMap<String, Object>();
@@ -123,49 +126,66 @@ public class AutobotApplication extends Application {
 				String json = om.writeValueAsString(request);
 				outStream.write(json.getBytes());
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				Log.e(TAG, e.getMessage());
 				e.printStackTrace();
+				ToastUtil.showToast(getApplicationContext(), e.getMessage());
 			}
 		} else {
+			// Call server by wifi
 			RequestParams rp = new RequestParams(params);
-			RestClient.get("http://" + getIp() + ":" + getPort() + "/" + command, rp, new JsonHttpResponseHandler() {
+			RestClient.get("http://" + getIp() + ":" + getPort() + "/"
+					+ command, rp, new JsonHttpResponseHandler() {
 				@Override
-	            public void onSuccess(int statusCode, Header[] headers, JSONObject data) {
-	                try {
-	                	if (data.getInt("code") != 0) {
-	                		ToastUtil.showToast(getApplicationContext(), data.getString("msg"));
+				public void onSuccess(int statusCode, Header[] headers,
+						JSONObject data) {
+					try {
+						if (data.getInt("code") != 0) {
+							ToastUtil.showToast(getApplicationContext(),
+									data.getString("msg"));
 						} else {
-							ToastUtil.showToast(getApplicationContext(), getString(R.string.msg_currentspeed) + data.getString("data") + "%");
+							ToastUtil.showToast(getApplicationContext(),
+									getString(R.string.msg_currentspeed) + ": "
+											+ data.getString("data") + "%");
 						}
 					} catch (NotFoundException e) {
-						ToastUtil.showToast(getApplicationContext(), e.getMessage());
+						ToastUtil.showToast(getApplicationContext(),
+								e.getMessage());
 					} catch (JSONException e) {
-						ToastUtil.showToast(getApplicationContext(), e.getMessage());
+						ToastUtil.showToast(getApplicationContext(),
+								e.getMessage());
 					}
-	            }
-	            
-	            @Override
-	            public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject error) {
-	            	ToastUtil.showToast(getApplicationContext(), e.getMessage());
-	            }
-	            @Override
-	            public void onFailure(int statusCode, Header[] headers, Throwable e, JSONArray error) {
-	            	ToastUtil.showToast(getApplicationContext(), e.getMessage());
-	            }
-	            @Override
-	            public void onFailure(int statusCode, Header[] headers, String error, Throwable e) {
-	            	ToastUtil.showToast(getApplicationContext(), error);
-	            }
+				}
+
+				@Override
+				public void onFailure(int statusCode, Header[] headers,
+						Throwable e, JSONObject error) {
+					ToastUtil.showToast(getApplicationContext(), e.getMessage());
+				}
+
+				@Override
+				public void onFailure(int statusCode, Header[] headers,
+						Throwable e, JSONArray error) {
+					ToastUtil.showToast(getApplicationContext(), e.getMessage());
+				}
+
+				@Override
+				public void onFailure(int statusCode, Header[] headers,
+						String error, Throwable e) {
+					ToastUtil.showToast(getApplicationContext(), error);
+				}
 			});
 		}
 	}
-	
-	public void call(String command, HashMap<String, String> params, JsonHttpResponseHandler callback) {
+
+	public void call(String command, HashMap<String, String> params,
+			JsonHttpResponseHandler callback) {
 		RequestParams rp = new RequestParams(params);
-		RestClient.get("http://" + getIp() + ":" + getPort() + "/" + command, rp, callback);
+		RestClient.get("http://" + getIp() + ":" + getPort() + "/" + command,
+				rp, callback);
 	}
-	
+
 	public String getVideoURL() {
-		return "http://"+this.getIp()+":"+this.getVideoPort()+"/?action=stream";
+		return "http://" + this.getIp() + ":" + this.getVideoPort()
+				+ "/?action=stream";
 	}
 }
