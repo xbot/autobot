@@ -144,12 +144,12 @@ class TimerThread(threading.Thread):
         self._timer.stop()
 
 
-def singleton(cls, *args, **kw):
+def singleton(cls):
     """ Set the decorated class singleton. """
 
     instances = {}
 
-    def _singleton():
+    def _singleton(*args, **kw):
         if cls not in instances:
             instances[cls] = cls(*args, **kw)
         return instances[cls]
@@ -203,6 +203,7 @@ def timed(genre, edge=None):
     return _timer
 
 
+@singleton
 class Bot(object):
 
     """ The Bot Object. """
