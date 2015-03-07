@@ -223,6 +223,7 @@ class Bot(object):
     _behavior = BEHAVIOR_NONE  # In which behavior the bot works.
     _isFrontBlocked = False  # Whether is there a barrier in the front.
     _direction = None  # <0.5 to turn left, >=0.5 to turn right.
+    _sendTime = None # Ultrasonic send time.
 
     def resume_behavior(fn):
         """ Resume behavior when motion is changed. """
@@ -303,7 +304,8 @@ class Bot(object):
                         return params[key]
             return defaultValue
 
-        if type(command) != types.StringType:
+        if type(command) != types.StringType \
+                and type(command) != types.UnicodeType:
             raise TypeError('Parameter \'command\' should be a string.')
         if type(params) != types.DictType and params is not None:
             raise TypeError('Parameter \'params\' should be a dict.')
@@ -529,8 +531,8 @@ class Bot(object):
 
         """
 
-        if type(speed) == types.StringType and speed.startswith(('-',
-                '+')):
+        if (type(speed) == types.StringType or type(speed) == types.UnicodeType) \
+                and speed.startswith(('-', '+')):
             tmp = speed[0] == '+' and self.getSpeed() + int(speed[1:]) \
                 or self.getSpeed() - int(speed[1:])
             if tmp >= 0 and tmp <= 100:
@@ -612,8 +614,6 @@ class Bot(object):
         GPIO.setup(self.pinTrig, GPIO.OUT)
         GPIO.setup(self.pinEcho, GPIO.IN)
 
-        sendTime = None  # start time holder
-
         @exclusive
         def on_echo(channel):
             """ Record the time when a wave is sent out or calculate 
@@ -644,11 +644,10 @@ class Bot(object):
             except RuntimeError:
                 return
 
-            global sendTime
             if pwl == GPIO.HIGH:
-                sendTime = time.time()
+                self._sendTime = time.time()
             else:
-                delta = time.time() - sendTime
+                delta = time.time() - self._sendTime
                 if 0.0235 > delta > 0.00015:  # Consider a distance between 2 and 400 cm as a reasonable value
                     distance = round(delta * 34000 / 2, 2)
                     if self.getBehavior() \
