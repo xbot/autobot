@@ -45,15 +45,15 @@ public final class R {
         public static final int webcam_on=0x7f020011;
     }
     public static final class id {
-        public static final int about=0x7f09001c;
-        public static final int app_name=0x7f090015;
-        public static final int app_version=0x7f090016;
-        public static final int bluetooth=0x7f09001d;
+        public static final int about=0x7f09001d;
+        public static final int app_name=0x7f090016;
+        public static final int app_version=0x7f090017;
+        public static final int bluetooth=0x7f09001e;
         public static final int btnAdjLeft=0x7f090007;
         public static final int btnAdjRight=0x7f090008;
         public static final int btnBTConnect=0x7f090002;
         public static final int btnBackward=0x7f090006;
-        public static final int btnConnect=0x7f090014;
+        public static final int btnConnect=0x7f090015;
         public static final int btnForward=0x7f090005;
         public static final int btnGearDown=0x7f09000b;
         public static final int btnGearUp=0x7f09000c;
@@ -63,18 +63,19 @@ public final class R {
         public static final int btnSwitchBehavior=0x7f09000e;
         public static final int btnToggleVideo=0x7f09000d;
         public static final int content=0x7f090000;
-        public static final int copyright_author=0x7f090018;
-        public static final int copyright_product=0x7f090019;
-        public static final int editFps=0x7f090013;
-        public static final int editIP=0x7f09000f;
-        public static final int editPort=0x7f090010;
-        public static final int editVideoPort=0x7f090011;
-        public static final int linearLayout1=0x7f090017;
-        public static final int menu_settings=0x7f09001a;
+        public static final int copyright_author=0x7f090019;
+        public static final int copyright_product=0x7f09001a;
+        public static final int editFps=0x7f090014;
+        public static final int editIP=0x7f090010;
+        public static final int editPort=0x7f090011;
+        public static final int editVideoPort=0x7f090012;
+        public static final int linearLayout1=0x7f090018;
+        public static final int menu_settings=0x7f09001b;
         public static final int mv=0x7f090003;
         public static final int spinBondedDevices=0x7f090001;
-        public static final int spinRslv=0x7f090012;
-        public static final int wifi=0x7f09001b;
+        public static final int spinRslv=0x7f090013;
+        public static final int textStatus=0x7f09000f;
+        public static final int wifi=0x7f09001c;
     }
     public static final class layout {
         public static final int activity_about=0x7f030000;

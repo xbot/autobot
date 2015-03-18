@@ -352,6 +352,8 @@ class Bot(object):
         else:
             raise Exception('Unknown command ' + command)
 
+        if speed is not None:
+            result['speed'] = self.getSpeed()
         return result
 
     @resume_behavior
@@ -857,7 +859,11 @@ class RequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         params = urlparse.parse_qs(pathInfo.query, True)
 
         if command == 'connect':
-            response['data'] = {'command':'connect', 'behavior':self.bot.getBehavior()}
+            response['data'] = {
+                'command':'connect',
+                'behavior':self.bot.getBehavior(),
+                'speed':self.bot.getSpeed()
+            }
             return response
 
         try:
@@ -922,7 +928,8 @@ def bluetoothd():
                         if cmd['command'] == 'connect':
                             resp['data'] = {
                                 'command':'connect',
-                                'behavior':bot.getBehavior()
+                                'behavior':bot.getBehavior(),
+                                'speed':bot.getSpeed()
                             }
                         else:
                             try:

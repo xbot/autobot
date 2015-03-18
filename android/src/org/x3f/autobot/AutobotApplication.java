@@ -137,15 +137,18 @@ public class AutobotApplication extends Application {
 					+ command, rp, new JsonHttpResponseHandler() {
 				@Override
 				public void onSuccess(int statusCode, Header[] headers,
-						JSONObject data) {
+						JSONObject result) {
 					try {
-						if (data.getInt("code") != 0) {
+						if (result.getInt("code") != 0) {
 							ToastUtil.showToast(getApplicationContext(),
-									data.getString("msg"));
+									result.getString("msg"));
 						} else {
-							ToastUtil.showToast(getApplicationContext(),
-									getString(R.string.msg_currentspeed) + ": "
-											+ data.getString("data") + "%");
+							JSONObject data = result.getJSONObject("data");
+							if (data.has("speed") && !data.isNull("speed")) {
+								ToastUtil.showToast(getApplicationContext(),
+										getString(R.string.msg_currentspeed) + ": "
+												+ data.getString("speed") + "%");
+							}
 						}
 					} catch (NotFoundException e) {
 						ToastUtil.showToast(getApplicationContext(),
@@ -187,5 +190,9 @@ public class AutobotApplication extends Application {
 	public String getVideoURL() {
 		return "http://" + this.getIp() + ":" + this.getVideoPort()
 				+ "/?action=stream";
+	}
+	
+	public boolean isBTConnected() {
+		return getBtSocket() != null && getBtSocket().isConnected();
 	}
 }

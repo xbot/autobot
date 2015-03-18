@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.HashMap;
+
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -28,6 +29,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.ToggleButton;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -43,6 +45,7 @@ public class ControlActivity extends Activity implements OnClickListener,
 
 	private MjpegView videoView = null;
 	private ImageButton btnSwitchBehavior = null;
+	private TextView textStatus = null;
 
 	private Thread btThread = null;
 
@@ -92,8 +95,7 @@ public class ControlActivity extends Activity implements OnClickListener,
 					} else {
 						// Show the current speed
 						if (data.has("speed") && !data.isNull("speed")) {
-							ToastUtil.showToast(getApplicationContext(),
-									getString(R.string.msg_currentspeed) + ": "
+							textStatus.setText(getString(R.string.msg_currentspeed) + ": "
 											+ data.getString("speed") + "%");
 						}
 					}
@@ -150,9 +152,11 @@ public class ControlActivity extends Activity implements OnClickListener,
 			int height = Integer.parseInt(resolution[1]);
 			videoView.setResolution(width, height);
 		}
+		
+		textStatus = (TextView) findViewById(R.id.textStatus);
 
 		// Start a thread to listen on bluetooth responses
-		if (app.getProtocol() == AutobotApplication.PROTOCOL_BT) {
+		if (app.getProtocol() == AutobotApplication.PROTOCOL_BT && app.isBTConnected()) {
 			btThread = new Thread(new Runnable() {
 
 				@Override
@@ -217,22 +221,22 @@ public class ControlActivity extends Activity implements OnClickListener,
 
 		switch (v.getId()) {
 		case R.id.btnForward:
-			app.call("forward", null);
+			call("forward", null);
 			break;
 		case R.id.btnBackward:
-			app.call("backward", null);
+			call("backward", null);
 			break;
 		case R.id.btnStop:
 			params.put("hold", "1");
-			app.call("stop", params);
+			call("stop", params);
 			break;
 		case R.id.btnGearUp:
 			params.put("speed", "+20");
-			app.call("vary", params);
+			call("vary", params);
 			break;
 		case R.id.btnGearDown:
 			params.put("speed", "-20");
-			app.call("vary", params);
+			call("vary", params);
 			break;
 		case R.id.btnToggleVideo:
 			ToggleButton btn = (ToggleButton) v;
@@ -241,7 +245,7 @@ public class ControlActivity extends Activity implements OnClickListener,
 				videoView.setBackgroundColor(Color.TRANSPARENT);
 				params.put("resolution", app.getVideoResolution());
 				params.put("fps", app.getVideoFps());
-				app.call("videoOn", params);
+				call("videoOn", params);
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
@@ -253,7 +257,7 @@ public class ControlActivity extends Activity implements OnClickListener,
 				}
 			} else {
 				// disable video
-				app.call("videoOff", params);
+				call("videoOff", params);
 				videoView.stopPlayback();
 				videoView.setBackgroundColor(Color.BLACK);
 			}
@@ -272,29 +276,38 @@ public class ControlActivity extends Activity implements OnClickListener,
 				params.put("v",
 						String.valueOf(AutobotApplication.BEHAVIOR_NONE));
 			}
-			if (app.getProtocol() == AutobotApplication.PROTOCOL_BT) {
-				app.call("behavior", params);
-			} else {
-				app.call("behavior", params, this.getBehaviorCallback());
-			}
+			call("behavior", params);
 			break;
 		default:
 			break;
 		}
 	}
+	
+	public void call(String command, HashMap<String, String> params) {
+		AutobotApplication app = (AutobotApplication) getApplication();
+		if (app.getProtocol() == AutobotApplication.PROTOCOL_BT) {
+			if (app.isBTConnected()) {
+				app.call("behavior", params);
+			} else {
+				// TODO fixme
+			}
+		} else {
+			app.call("behavior", params, this.getHttpCallback());
+		}
+	}
 
-	private JsonHttpResponseHandler getBehaviorCallback() {
+	private JsonHttpResponseHandler getHttpCallback() {
 		return new JsonHttpResponseHandler() {
 			@Override
 			public void onSuccess(int statusCode, Header[] headers,
-					JSONObject data) {
+					JSONObject result) {
 				try {
-					if (data.getInt("code") != 0) {
+					if (result.getInt("code") != 0) {
 						ToastUtil.showToast(getApplicationContext(),
-								data.getString("msg"));
+								result.getString("msg"));
 					} else {
 						mHandler.obtainMessage(MSG_DATA_RECEIVED,
-								data.getJSONObject("data")).sendToTarget();
+								result.getJSONObject("data")).sendToTarget();
 					}
 				} catch (NotFoundException e) {
 					ToastUtil
@@ -333,36 +346,36 @@ public class ControlActivity extends Activity implements OnClickListener,
 		switch (v.getId()) {
 		case R.id.btnLeft:
 			if (event.getAction() == MotionEvent.ACTION_DOWN) {
-				app.call("left", params);
+				call("left", params);
 			}
 			if (event.getAction() == MotionEvent.ACTION_UP) {
 				params.put("hold", "1");
-				app.call("stop", params);
+				call("stop", params);
 			}
 			break;
 		case R.id.btnRight:
 			if (event.getAction() == MotionEvent.ACTION_DOWN) {
-				app.call("right", params);
+				call("right", params);
 			}
 			if (event.getAction() == MotionEvent.ACTION_UP) {
 				params.put("hold", "1");
-				app.call("stop", params);
+				call("stop", params);
 			}
 			break;
 		case R.id.btnAdjLeft:
 			if (event.getAction() == MotionEvent.ACTION_DOWN) {
-				app.call("adjustLeft", params);
+				call("adjustLeft", params);
 			}
 			if (event.getAction() == MotionEvent.ACTION_UP) {
-				app.call("resume", params);
+				call("resume", params);
 			}
 			break;
 		case R.id.btnAdjRight:
 			if (event.getAction() == MotionEvent.ACTION_DOWN) {
-				app.call("adjustRight", params);
+				call("adjustRight", params);
 			}
 			if (event.getAction() == MotionEvent.ACTION_UP) {
-				app.call("resume", params);
+				call("resume", params);
 			}
 			break;
 		default:
@@ -384,12 +397,7 @@ public class ControlActivity extends Activity implements OnClickListener,
 		}
 
 		// Fetch autobot's states
-		if (app.getProtocol() == AutobotApplication.PROTOCOL_BT) {
-			app.call("connect", new HashMap<String, String>());
-		} else {
-			app.call("connect", new HashMap<String, String>(),
-					this.getBehaviorCallback());
-		}
+		call("connect", new HashMap<String, String>());
 	}
 
 	public void onPause() {
