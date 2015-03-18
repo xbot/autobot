@@ -352,8 +352,7 @@ class Bot(object):
         else:
             raise Exception('Unknown command ' + command)
 
-        if speed is not None:
-            result['speed'] = self.getSpeed()
+        result['speed'] = self.getSpeed()
         return result
 
     @resume_behavior
@@ -966,9 +965,9 @@ def both():
 
 if __name__ == '__main__':
     try:
-        # both()
+        both()
         # httpd()
-        bluetoothd()
+        # bluetoothd()
     except KeyboardInterrupt:
         print 'Game over.'
     finally:

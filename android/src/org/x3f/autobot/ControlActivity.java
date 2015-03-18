@@ -92,12 +92,11 @@ public class ControlActivity extends Activity implements OnClickListener,
 							btnSwitchBehavior.setImageDrawable(getResources()
 									.getDrawable(R.drawable.avatar));
 						}
-					} else {
-						// Show the current speed
-						if (data.has("speed") && !data.isNull("speed")) {
-							textStatus.setText(getString(R.string.msg_currentspeed) + ": "
-											+ data.getString("speed") + "%");
-						}
+					}
+					// Show the current speed
+					if (data.has("speed") && !data.isNull("speed")) {
+						textStatus.setText(getString(R.string.msg_currentspeed) + ": "
+										+ data.getString("speed") + "%");
 					}
 				} catch (JSONException e) {
 					Log.e(TAG, "Invalid json: " + e.getMessage());
@@ -287,12 +286,12 @@ public class ControlActivity extends Activity implements OnClickListener,
 		AutobotApplication app = (AutobotApplication) getApplication();
 		if (app.getProtocol() == AutobotApplication.PROTOCOL_BT) {
 			if (app.isBTConnected()) {
-				app.call("behavior", params);
+				app.call(command, params);
 			} else {
 				// TODO fixme
 			}
 		} else {
-			app.call("behavior", params, this.getHttpCallback());
+			app.call(command, params, this.getHttpCallback());
 		}
 	}
 
