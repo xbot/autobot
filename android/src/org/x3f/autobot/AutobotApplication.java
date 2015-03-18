@@ -4,10 +4,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
 
-import org.apache.http.Header;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.x3f.lib.RestClient;
 import org.x3f.lib.ToastUtil;
 
@@ -17,7 +13,6 @@ import com.loopj.android.http.RequestParams;
 
 import android.app.Application;
 import android.bluetooth.BluetoothSocket;
-import android.content.res.Resources.NotFoundException;
 import android.util.Log;
 
 public class AutobotApplication extends Application {
