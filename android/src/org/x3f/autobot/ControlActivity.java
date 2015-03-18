@@ -95,8 +95,8 @@ public class ControlActivity extends Activity implements OnClickListener,
 					}
 					// Show the current speed
 					if (data.has("speed") && !data.isNull("speed")) {
-						textStatus.setText(getString(R.string.msg_currentspeed) + ": "
-										+ data.getString("speed") + "%");
+						textStatus.setText(getString(R.string.msg_currentspeed)
+								+ ": " + data.getString("speed") + "%");
 					}
 				} catch (JSONException e) {
 					Log.e(TAG, "Invalid json: " + e.getMessage());
@@ -151,11 +151,12 @@ public class ControlActivity extends Activity implements OnClickListener,
 			int height = Integer.parseInt(resolution[1]);
 			videoView.setResolution(width, height);
 		}
-		
+
 		textStatus = (TextView) findViewById(R.id.textStatus);
 
 		// Start a thread to listen on bluetooth responses
-		if (app.getProtocol() == AutobotApplication.PROTOCOL_BT && app.isBTConnected()) {
+		if (app.getProtocol() == AutobotApplication.PROTOCOL_BT
+				&& app.isBTConnected()) {
 			btThread = new Thread(new Runnable() {
 
 				@Override
@@ -248,7 +249,8 @@ public class ControlActivity extends Activity implements OnClickListener,
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
-					Log.e(TAG, "Interrupted while waiting video service to start.");
+					Log.e(TAG,
+							"Interrupted while waiting video service to start.");
 					e.printStackTrace();
 				}
 				if (!videoView.isStreaming()) {
@@ -281,14 +283,15 @@ public class ControlActivity extends Activity implements OnClickListener,
 			break;
 		}
 	}
-	
+
 	public void call(String command, HashMap<String, String> params) {
 		AutobotApplication app = (AutobotApplication) getApplication();
 		if (app.getProtocol() == AutobotApplication.PROTOCOL_BT) {
 			if (app.isBTConnected()) {
 				app.call(command, params);
 			} else {
-				// TODO fixme
+				ToastUtil.showToast(getApplicationContext(),
+						getString(R.string.msg_socketnotconnected));
 			}
 		} else {
 			app.call(command, params, this.getHttpCallback());
@@ -340,7 +343,6 @@ public class ControlActivity extends Activity implements OnClickListener,
 	@SuppressLint("ClickableViewAccessibility")
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
-		AutobotApplication app = (AutobotApplication) getApplication();
 		HashMap<String, String> params = new HashMap<String, String>();
 		switch (v.getId()) {
 		case R.id.btnLeft:
@@ -385,7 +387,7 @@ public class ControlActivity extends Activity implements OnClickListener,
 
 	public void onResume() {
 		super.onResume();
-		
+
 		AutobotApplication app = (AutobotApplication) getApplication();
 
 		if (videoView != null) {
