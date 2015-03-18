@@ -115,68 +115,18 @@ public class AutobotApplication extends Application {
 	}
 
 	public void call(String command, HashMap<String, String> params) {
-		// Call server by bluetooth
-		if (getProtocol() == PROTOCOL_BT) {
-			try {
-				OutputStream outStream = btSocket.getOutputStream();
-				HashMap<String, Object> request = new HashMap<String, Object>();
-				request.put("command", command);
-				request.put("params", params);
-				ObjectMapper om = new ObjectMapper();
-				String json = om.writeValueAsString(request);
-				outStream.write(json.getBytes());
-			} catch (IOException e) {
-				Log.e(TAG, e.getMessage());
-				e.printStackTrace();
-				ToastUtil.showToast(getApplicationContext(), e.getMessage());
-			}
-		} else {
-			// Call server by wifi
-			RequestParams rp = new RequestParams(params);
-			RestClient.get("http://" + getIp() + ":" + getPort() + "/"
-					+ command, rp, new JsonHttpResponseHandler() {
-				@Override
-				public void onSuccess(int statusCode, Header[] headers,
-						JSONObject result) {
-					try {
-						if (result.getInt("code") != 0) {
-							ToastUtil.showToast(getApplicationContext(),
-									result.getString("msg"));
-						} else {
-							JSONObject data = result.getJSONObject("data");
-							if (data.has("speed") && !data.isNull("speed")) {
-								ToastUtil.showToast(getApplicationContext(),
-										getString(R.string.msg_currentspeed) + ": "
-												+ data.getString("speed") + "%");
-							}
-						}
-					} catch (NotFoundException e) {
-						ToastUtil.showToast(getApplicationContext(),
-								e.getMessage());
-					} catch (JSONException e) {
-						ToastUtil.showToast(getApplicationContext(),
-								e.getMessage());
-					}
-				}
-
-				@Override
-				public void onFailure(int statusCode, Header[] headers,
-						Throwable e, JSONObject error) {
-					ToastUtil.showToast(getApplicationContext(), e.getMessage());
-				}
-
-				@Override
-				public void onFailure(int statusCode, Header[] headers,
-						Throwable e, JSONArray error) {
-					ToastUtil.showToast(getApplicationContext(), e.getMessage());
-				}
-
-				@Override
-				public void onFailure(int statusCode, Header[] headers,
-						String error, Throwable e) {
-					ToastUtil.showToast(getApplicationContext(), error);
-				}
-			});
+		try {
+			OutputStream outStream = btSocket.getOutputStream();
+			HashMap<String, Object> request = new HashMap<String, Object>();
+			request.put("command", command);
+			request.put("params", params);
+			ObjectMapper om = new ObjectMapper();
+			String json = om.writeValueAsString(request);
+			outStream.write(json.getBytes());
+		} catch (IOException e) {
+			Log.e(TAG, e.getMessage());
+			e.printStackTrace();
+			ToastUtil.showToast(getApplicationContext(), e.getMessage());
 		}
 	}
 
