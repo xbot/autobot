@@ -648,14 +648,15 @@ class Bot(object):
             if pwl == GPIO.HIGH:
                 self._sendTime = time.time()
             else:
-                delta = time.time() - self._sendTime
-                if 0.0235 > delta > 0.00015:  # Consider a distance between 2 and 400 cm as a reasonable value
-                    distance = round(delta * 34000 / 2, 2)
-                    if self.getBehavior() \
-                        == self.BEHAVIOR_ANTICOLLISION:
-                        stop_on_collision_threat(distance)
-                    elif self.getBehavior() == self.BEHAVIOR_AUTOMATION:
-                        act_on_my_own(distance)
+                if self._sendTime is not None:
+                    delta = time.time() - self._sendTime
+                    if 0.0235 > delta > 0.00015:  # Consider a distance between 2 and 400 cm as a reasonable value
+                        distance = round(delta * 34000 / 2, 2)
+                        if self.getBehavior() \
+                            == self.BEHAVIOR_ANTICOLLISION:
+                            stop_on_collision_threat(distance)
+                        elif self.getBehavior() == self.BEHAVIOR_AUTOMATION:
+                            act_on_my_own(distance)
 
         GPIO.add_event_detect(self.pinEcho, GPIO.BOTH, callback=on_echo)
 
