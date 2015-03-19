@@ -140,4 +140,23 @@ public class AutobotApplication extends Application {
 	public boolean isBTConnected() {
 		return getBtSocket() != null && getBtSocket().isConnected();
 	}
+	
+	public String getMotionLabel(String motion) {
+		if (motion.equals("forward")) {
+			return getString(R.string.btn_forward);
+		} else if (motion.equals("backward")) {
+			return getString(R.string.btn_backward);
+		} else if (motion.equals("left")) {
+			return getString(R.string.btn_left);
+		} else if (motion.equals("right")) {
+			return getString(R.string.btn_right);
+		} else if (motion.equals("adjleft")) {
+			return getString(R.string.btn_adjleft);
+		} else if (motion.equals("adjright")) {
+			return getString(R.string.btn_adjright);
+		} else if (motion.equals("stop")) {
+			return getString(R.string.btn_stop);
+		}
+		return "";
+	}
 }

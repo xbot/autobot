@@ -310,7 +310,7 @@ class Bot(object):
         if type(params) != types.DictType and params is not None:
             raise TypeError('Parameter \'params\' should be a dict.')
 
-        result = {'command':command, 'speed':None}
+        result = {'command':command, 'speed':None, 'motion':None}
 
         speed = GetParam(params, 'speed', None)
         if command == 'forward':
@@ -324,12 +324,15 @@ class Bot(object):
         elif command == 'stop':
             holdSpeed = GetParam(params, 'hold', '0')
             self.stop(holdSpeed == '1')
+            result['motion'] = 'stop';
         elif command == 'vary':
             self.setSpeed(speed, True)
         elif command == 'adjustLeft':
             self.adjustLeft()
+            result['motion'] = 'adjleft';
         elif command == 'adjustRight':
             self.adjustRight()
+            result['motion'] = 'adjright';
         elif command == 'resume':
             if ['forward', 'backward'].count(self.getMotion()) > 0:
                 self.do(self.getMotion())
@@ -353,6 +356,8 @@ class Bot(object):
             raise Exception('Unknown command ' + command)
 
         result['speed'] = self.getSpeed()
+        if result['motion'] is None:
+            result['motion'] = self.getMotion()
         return result
 
     @resume_behavior

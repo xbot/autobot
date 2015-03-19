@@ -33,7 +33,7 @@
     <string name="hint_port">端口</string>
     <string name="hint_videoport">視頻服務端口</string>
     <string name="hint_btaddr">藍牙地址</string>
-    <string name="msg_currentspeed">當前速度</string>
+    <string name="msg_currentspeed">速度</string>
 	<string name="msg_connected">連接已建立</string>
 	<string name="msg_connectionfailed">連接失敗</string>
 	<string name="msg_behavior_none">手動操作</string>

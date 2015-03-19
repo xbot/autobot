@@ -93,10 +93,21 @@ public class ControlActivity extends Activity implements OnClickListener,
 									.getDrawable(R.drawable.avatar));
 						}
 					}
-					// Show the current speed
+					// Show the current speed and motion
+					String statusStr = "";
+					if (data.has("motion") && !data.isNull("motion")) {
+						statusStr += app.getMotionLabel(data
+								.getString("motion"));
+					}
 					if (data.has("speed") && !data.isNull("speed")) {
-						textStatus.setText(getString(R.string.msg_currentspeed)
-								+ ": " + data.getString("speed") + "%");
+						if (!statusStr.isEmpty()) {
+							statusStr += "，";
+						}
+						statusStr += getString(R.string.msg_currentspeed)
+								+ data.getString("speed") + "%";
+					}
+					if (!statusStr.isEmpty()) {
+						textStatus.setText(statusStr);
 					}
 				} catch (JSONException e) {
 					Log.e(TAG, "Invalid json: " + e.getMessage());
