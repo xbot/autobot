@@ -907,6 +907,7 @@ class RequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         if command == 'connect':
             response['data']['behavior'] = self.bot.getBehavior()
             response['data']['speed'] = self.bot.getSpeed()
+            response['data']['motion'] = self.bot.getMotion() is None and 'stop' or self.bot.getMotion()
         else:
             try:
                 result = self.bot.do(command, params)
@@ -982,6 +983,7 @@ def bluetoothd():
                         if request['command'] == 'connect':
                             response['data']['behavior'] = bot.getBehavior()
                             response['data']['speed'] = bot.getSpeed()
+                            response['data']['motion'] = bot.getMotion() is None and 'stop' or bot.getMotion()
                         else:
                             try:
                                 result = bot.do(request['command'], request['params'])

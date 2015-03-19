@@ -171,7 +171,7 @@ public class ControlActivity extends Activity implements OnClickListener,
 		View btnGearDown = this.findViewById(R.id.btnGearDown);
 		btnGearDown.setOnClickListener(this);
 		View btnToggleVideo = this.findViewById(R.id.btnToggleVideo);
-		if (app.getBtSocket() instanceof BluetoothSocket) {
+		if (app.getProtocol() == AutobotApplication.PROTOCOL_BT) {
 			btnToggleVideo.setEnabled(false);
 		} else {
 			btnToggleVideo.setOnClickListener(this);
