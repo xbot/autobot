@@ -2,7 +2,10 @@ package org.x3f.autobot;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 import java.util.HashMap;
 
 import org.apache.http.Header;
@@ -43,7 +46,7 @@ public class ControlActivity extends Activity implements OnClickListener,
 
 	private static final String TAG = "ControlActivity";
 
-	private MjpegView videoView = null;
+	private MjpegView2 videoView = null;
 	private ImageButton btnSwitchBehavior = null;
 	private TextView textStatus = null;
 
@@ -180,12 +183,13 @@ public class ControlActivity extends Activity implements OnClickListener,
 				.findViewById(R.id.btnSwitchBehavior);
 		btnSwitchBehavior.setOnClickListener(this);
 
-		videoView = (MjpegView) findViewById(R.id.mv);
+		videoView = (MjpegView2) findViewById(R.id.mv);
 		if (videoView != null) {
-			String[] resolution = app.getVideoResolution().split("x");
-			int width = Integer.parseInt(resolution[0]);
-			int height = Integer.parseInt(resolution[1]);
-			videoView.setResolution(width, height);
+//			String[] resolution = app.getVideoResolution().split("x");
+//			int width = Integer.parseInt(resolution[0]);
+//			int height = Integer.parseInt(resolution[1]);
+//			videoView.setResolution(width, height);
+		    videoView.setDisplayMode(MjpegView.SIZE_FULLSCREEN);
 		}
 
 		textStatus = (TextView) findViewById(R.id.textStatus);
@@ -289,9 +293,9 @@ public class ControlActivity extends Activity implements OnClickListener,
 							"Interrupted while waiting video service to start.");
 					e.printStackTrace();
 				}
-				if (!videoView.isStreaming()) {
+//				if (!videoView.isStreaming()) {
 					new DoRead().execute(app.getVideoURL());
-				}
+//				}
 			} else {
 				// disable video
 				call("videoOff", params);
@@ -426,12 +430,12 @@ public class ControlActivity extends Activity implements OnClickListener,
 
 		AutobotApplication app = (AutobotApplication) getApplication();
 
-		if (videoView != null) {
-			if (suspending) {
-				new DoRead().execute(app.getVideoURL());
-				suspending = false;
-			}
-		}
+//		if (videoView != null) {
+//			if (suspending) {
+//				new DoRead().execute(app.getVideoURL());
+//				suspending = false;
+//			}
+//		}
 
 		// Fetch autobot's states
 		call("connect", new HashMap<String, String>());
@@ -439,19 +443,19 @@ public class ControlActivity extends Activity implements OnClickListener,
 
 	public void onPause() {
 		super.onPause();
-		if (videoView != null) {
-			if (videoView.isStreaming()) {
-				videoView.stopPlayback();
-				suspending = true;
-			}
-		}
+//		if (videoView != null) {
+//			if (videoView.isStreaming()) {
+//				videoView.stopPlayback();
+//				suspending = true;
+//			}
+//		}
 	}
 
 	public void onDestroy() {
 		AutobotApplication app = (AutobotApplication) getApplication();
-		if (videoView != null) {
-			videoView.freeCameraMemory();
-		}
+//		if (videoView != null) {
+//			videoView.freeCameraMemory();
+//		}
 		// Close BT socket if it is connected
 		if (app.getBtSocket() instanceof BluetoothSocket
 				&& app.getBtSocket().isConnected()) {
@@ -474,9 +478,9 @@ public class ControlActivity extends Activity implements OnClickListener,
 				getString(R.string.msg_imageerror)).sendToTarget();
 	}
 
-	public class DoRead extends AsyncTask<String, Void, MjpegInputStream> {
+	public class DoRead extends AsyncTask<String, Void, MjpegInputStream2> {
 
-		protected MjpegInputStream doInBackground(String... url) {
+		protected MjpegInputStream2 doInBackground(String... url) {
 			HttpResponse res = null;
 			DefaultHttpClient httpclient = new DefaultHttpClient();
 			HttpParams httpParams = httpclient.getParams();
@@ -489,7 +493,7 @@ public class ControlActivity extends Activity implements OnClickListener,
 					// will work
 					return null;
 				}
-				return new MjpegInputStream(res.getEntity().getContent());
+				return new MjpegInputStream2(res.getEntity().getContent());
 			} catch (ClientProtocolException e) {
 				Log.d(TAG, "Request failed-ClientProtocolException", e);
 				// Error connecting to camera
@@ -500,16 +504,8 @@ public class ControlActivity extends Activity implements OnClickListener,
 			return null;
 		}
 
-		protected void onPostExecute(MjpegInputStream result) {
+		protected void onPostExecute(MjpegInputStream2 result) {
 			videoView.setSource(result);
-			if (result != null) {
-				result.setSkip(1);
-				ToastUtil.showToast(getApplicationContext(),
-						getString(R.string.msg_connected));
-			} else {
-				ToastUtil.showToast(getApplicationContext(),
-						getString(R.string.msg_connectionfailed));
-			}
 			videoView.setDisplayMode(MjpegView.SIZE_BEST_FIT);
 			videoView.showFps(true);
 		}
