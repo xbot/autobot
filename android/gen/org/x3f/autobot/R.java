@@ -95,8 +95,6 @@ public final class R {
         public static final int about_title=0x7f060003;
         public static final int app_author=0x7f060002;
         public static final int app_desc=0x7f060001;
-        /**  Titles 
-         */
         public static final int app_name=0x7f060000;
         public static final int app_version=0x7f060004;
         public static final int btn_adjleft=0x7f060010;
