@@ -385,7 +385,7 @@ class Bot(object):
 
         result['speed'] = self.getSpeed()
         if result['motion'] is None:
-            result['motion'] = self.getMotion()
+            result['motion'] = self.getMotion() is None and 'stop' or self.getMotion()
         return result
 
     @resume_behavior
