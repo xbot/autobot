@@ -114,12 +114,26 @@ class Timer(object):
             self._startTime = goOn and time.time() or None
             self._data['total'] = self._data['total'] + delta
             self._data['thistime'] = self._data['thistime'] + delta
-            f = open(self._file, 'w')
-            json.dump(self._data, f)
-            f.close()
+            self.save()
 
     def stash(self):
         self.stop(True)
+
+    def reset(self):
+        self.stash()
+        self._data['thistime'] = 0
+        self.save()
+
+    def save(self):
+        f = open(self._file, 'w')
+        json.dump(self._data, f)
+        f.close()
+
+    def getTotalTime(self):
+        return self._data['total']
+
+    def getThisTime(self):
+        return self._data['thistime']
 
 
 class TimerThread(threading.Thread):
@@ -142,6 +156,15 @@ class TimerThread(threading.Thread):
 
     def stopTimer(self):
         self._timer.stop()
+
+    def resetTimer(self):
+        self._timer.reset()
+
+    def getTotalTime(self):
+        return self._timer.getTotalTime()
+
+    def getThisTime(self):
+        return self._timer.getThisTime()
 
 
 def singleton(cls):
@@ -306,11 +329,11 @@ class Bot(object):
 
         if type(command) != types.StringType \
                 and type(command) != types.UnicodeType:
-            raise TypeError('Parameter \'command\' should be a string.')
+            raise TypeError("Parameter 'command' should be a string.")
         if type(params) != types.DictType and params is not None:
-            raise TypeError('Parameter \'params\' should be a dict.')
+            raise TypeError("Parameter 'params' should be a dict.")
 
-        result = {'command':command, 'speed':None, 'motion':None}
+        result = {'speed':None, 'motion':None}
 
         speed = GetParam(params, 'speed', None)
         if command == 'forward':
@@ -352,6 +375,11 @@ class Bot(object):
             if behavior is not None and behavior.isdigit():
                 self.setBehavior(int(behavior))
             result['behavior'] = self.getBehavior()
+        elif command == 'resetTimer':
+            stdbyTmrThread = StdbyTimerThread()
+            stdbyTmrThread.resetTimer()
+            mtrTmrThread = MotorTimerThread()
+            mtrTmrThread.resetTimer()
         else:
             raise Exception('Unknown command ' + command)
 
@@ -858,25 +886,34 @@ class RequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
         """
 
-        response = {'code': 0, 'msg': '', 'data': None}
         pathInfo = urlparse.urlparse(self.path)
         command = pathInfo.path.strip(' /')
         params = urlparse.parse_qs(pathInfo.query, True)
 
-        if command == 'connect':
-            response['data'] = {
-                'command':'connect',
-                'behavior':self.bot.getBehavior(),
-                'speed':self.bot.getSpeed()
+        response = {
+            'code': 0,
+            'msg': '',
+            'data': {
+                'command':command,
+                'timer':{
+                    'stdby_total':StdbyTimerThread().getTotalTime(),
+                    'stdby_this':StdbyTimerThread().getThisTime(),
+                    'motor_total':MotorTimerThread().getTotalTime(),
+                    'motor_this':MotorTimerThread().getThisTime()
+                }
             }
-            return response
+        }
 
-        try:
-            response['data'] = self.bot.do(command, params)
-        except Exception, e:
-            response['code'] = 1
-            response['msg'] = str(e)
-            return response
+        if command == 'connect':
+            response['data']['behavior'] = self.bot.getBehavior()
+            response['data']['speed'] = self.bot.getSpeed()
+        else:
+            try:
+                result = self.bot.do(command, params)
+                response['data'].update(result)
+            except Exception, e:
+                response['code'] = 1
+                response['msg'] = str(e)
 
         return response
 
@@ -921,32 +958,42 @@ def bluetoothd():
 
             try:
                 while True:
-                    resp = {'code':0, 'msg':'', 'data':None}
-
                     data = cliSock.recv(1024)
                     if len(data) == 0: break
                     print threadName, "Received [%s]" % data
 
                     try:
-                        cmd = json.loads(data)
+                        request = json.loads(data)
 
-                        if cmd['command'] == 'connect':
-                            resp['data'] = {
-                                'command':'connect',
-                                'behavior':bot.getBehavior(),
-                                'speed':bot.getSpeed()
+                        response = {
+                            'code':0,
+                            'msg':'',
+                            'data': {
+                                'command':request['command'],
+                                'timer':{
+                                    'stdby_total':StdbyTimerThread().getTotalTime(),
+                                    'stdby_this':StdbyTimerThread().getThisTime(),
+                                    'motor_total':MotorTimerThread().getTotalTime(),
+                                    'motor_this':MotorTimerThread().getThisTime()
+                                }
                             }
+                        }
+
+                        if request['command'] == 'connect':
+                            response['data']['behavior'] = bot.getBehavior()
+                            response['data']['speed'] = bot.getSpeed()
                         else:
                             try:
-                                resp['data'] = bot.do(cmd['command'], cmd['params'])
+                                result = bot.do(request['command'], request['params'])
+                                response['data'].update(result)
                             except Exception, e:
-                                resp['code'] = 1
-                                resp['msg'] = str(e)
+                                response['code'] = 1
+                                response['msg'] = str(e)
                     except ValueError:
-                        resp['code'] = ERR_INVALID_JSON
-                        resp['msg'] = 'Invalid JSON.'
+                        response['code'] = ERR_INVALID_JSON
+                        response['msg'] = 'Invalid JSON.'
 
-                    cliSock.send(json.dumps(resp))
+                    cliSock.send(json.dumps(response))
             except IOError:
                 pass
 

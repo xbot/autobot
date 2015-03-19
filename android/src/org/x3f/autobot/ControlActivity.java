@@ -95,20 +95,45 @@ public class ControlActivity extends Activity implements OnClickListener,
 					}
 					// Show the current speed and motion
 					String statusStr = "";
-					if (data.has("motion") && !data.isNull("motion")) {
-						statusStr += app.getMotionLabel(data
-								.getString("motion"));
+					if (data.has("motion") && !data.isNull("motion")
+							&& data.has("speed") && !data.isNull("speed")) {
+						statusStr += String.format(
+								getString(R.string.tmpl_status),
+								app.getMotionLabel(data.getString("motion")),
+								data.getString("speed"));
 					}
-					if (data.has("speed") && !data.isNull("speed")) {
-						if (!statusStr.isEmpty()) {
-							statusStr += "，";
+					// Show timer
+					if (data.has("timer") && !data.isNull("timer")) {
+						JSONObject timerData = data.getJSONObject("timer");
+						if (timerData.has("stdby_total")
+								&& !timerData.isNull("stdby_total")
+								&& timerData.has("stdby_this")
+								&& !timerData.isNull("stdby_this")) {
+							int stdbyTotal = timerData.getInt("stdby_total");
+							int stdbyThis = timerData.getInt("stdby_this");
+							if (!statusStr.isEmpty())
+								statusStr += "\n";
+							statusStr += String.format(
+									getString(R.string.tmpl_stdby),
+									stdbyTotal / 3600, stdbyTotal % 3600 / 60,
+									stdbyThis / 3600, stdbyThis % 3600 / 60);
 						}
-						statusStr += getString(R.string.msg_currentspeed)
-								+ data.getString("speed") + "%";
+						if (timerData.has("motor_total")
+								&& !timerData.isNull("motor_total")
+								&& timerData.has("motor_this")
+								&& !timerData.isNull("motor_this")) {
+							int mtrTotal = timerData.getInt("motor_total");
+							int mtrThis = timerData.getInt("motor_this");
+							if (!statusStr.isEmpty())
+								statusStr += "\n";
+							statusStr += String.format(
+									getString(R.string.tmpl_motor),
+									mtrTotal / 3600, mtrTotal % 3600 / 60,
+									mtrThis / 3600, mtrThis % 3600 / 60);
+						}
 					}
-					if (!statusStr.isEmpty()) {
+					if (!statusStr.isEmpty())
 						textStatus.setText(statusStr);
-					}
 				} catch (JSONException e) {
 					Log.e(TAG, "Invalid json: " + e.getMessage());
 					e.printStackTrace();
@@ -446,7 +471,7 @@ public class ControlActivity extends Activity implements OnClickListener,
 
 	public void setImageError() {
 		mHandler.obtainMessage(MSG_SHOW_TOAST,
-				getString(R.string.title_imageerror)).sendToTarget();
+				getString(R.string.msg_imageerror)).sendToTarget();
 	}
 
 	public class DoRead extends AsyncTask<String, Void, MjpegInputStream> {

@@ -1,25 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
-    <!-- Titles -->
     <string name="app_name">軒轅之鼓</string>
     <string name="app_desc">輪式智能機器人客戶端</string>
     <string name="app_author">淘氣</string>
     <string name="about_title">輪式智能機器人客戶端</string>
-    <string name="app_version">v3.0</string>
-    <string name="about_content">版本：3.0\n發布：2015.02.28\n作者：淘氣\n電郵：donie.leigh@gmail.com</string>
+    <string name="app_version">v3.1</string>
+    <string name="about_content">版本：3.1\n發布：2015.03.19\n作者：淘氣\n電郵：donie.leigh@gmail.com</string>
     <string name="label_about">關於</string>
     <string name="label_bluetooth">藍牙</string>
     <string name="label_wifi">WiFi</string>
     <string name="label_product">一下</string>
     <string name="menu_settings">設置</string>
-    <string name="msg_quit">再按一次退出應用</string>
-    <string name="app_connect">連接</string>
-    <string name="msg_emptyip">IP地址不能為空</string>
-    <string name="msg_emptyport">端口不能為空</string>
-    <string name="msg_emptyvideoport">視頻服務端口不能為空</string>
-    <string name="msg_emptyvideofps">視頻幀數不能為空</string>
-    <string name="msg_emptybtaddr">藍牙地址不能為空</string>
+    <string name="btn_connect">連接</string>
     <string name="btn_forward">直行</string>
     <string name="btn_backward">倒車</string>
     <string name="btn_left">左轉</string>
@@ -29,11 +22,18 @@
     <string name="btn_stop">停車</string>
     <string name="btn_gearup">加速20%</string>
     <string name="btn_geardown">減速20%</string>
+    <string name="btn_enablevideo">監控</string>
+	<string name="btn_disablevideo">關閉</string>
     <string name="hint_ipaddr">IP地址</string>
     <string name="hint_port">端口</string>
     <string name="hint_videoport">視頻服務端口</string>
     <string name="hint_btaddr">藍牙地址</string>
-    <string name="msg_currentspeed">速度</string>
+    <string name="msg_quit">再按一次退出應用</string>
+    <string name="msg_emptyip">IP地址不能為空</string>
+    <string name="msg_emptyport">端口不能為空</string>
+    <string name="msg_emptyvideoport">視頻服務端口不能為空</string>
+    <string name="msg_emptyvideofps">視頻幀數不能為空</string>
+    <string name="msg_emptybtaddr">藍牙地址不能為空</string>
 	<string name="msg_connected">連接已建立</string>
 	<string name="msg_connectionfailed">連接失敗</string>
 	<string name="msg_behavior_none">手動操作</string>
@@ -44,9 +44,10 @@
 	<string name="msg_requesttimeout">請求超時</string>
 	<string name="msg_invalidjson">JSON數據非法</string>
 	<string name="msg_socketnotconnected">Socket未連接</string>
-	<string name="title_imageerror">接收視頻失敗</string>
-	<string name="btn_enablevideo">監控</string>
-	<string name="btn_disablevideo">關閉</string>
+	<string name="msg_imageerror">接收視頻失敗</string>
 	<string name="img_avatar">Autobot</string>
+	<string name="tmpl_status">狀態：%1$s，速度%2$s%%</string>
+	<string name="tmpl_stdby">待機：總%1$d時%2$d分，本次%3$d時%4$d分</string>
+	<string name="tmpl_motor">電機：總%1$d時%2$d分，本次%3$d時%4$d分</string>
 
 </resources>
