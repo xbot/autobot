@@ -13,6 +13,7 @@ import com.loopj.android.http.RequestParams;
 
 import android.app.Application;
 import android.bluetooth.BluetoothSocket;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 public class AutobotApplication extends Application {
@@ -27,11 +28,14 @@ public class AutobotApplication extends Application {
 	private int behavior;
 	private BluetoothSocket btSocket;
 	private int protocol;
+
+	private SharedPreferences sharedPref;
 	public static int BEHAVIOR_NONE = 0;
 	public static int BEHAVIOR_ANTICOLLISION = 1;
 	public static int BEHAVIOR_AUTOMATION = 2;
 	public static int PROTOCOL_HTTP = 1;
 	public static int PROTOCOL_BT = 2;
+	public static String PREF_FILE_KEY = "org.x3f.autobot.sharedpref";
 
 	public String getIp() {
 		return ip;
@@ -100,13 +104,16 @@ public class AutobotApplication extends Application {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		setIp("10.0.0.1");
-		setPort("8000");
-		setVideoPort("8080");
-		setVideoResolution("160x120");
-		setVideoFps("30");
+		
+		sharedPref = getSharedPreferences(PREF_FILE_KEY, MODE_PRIVATE);
+		
+		setIp(sharedPref.getString("last_bot_ip", "10.0.0.1"));
+		setPort(sharedPref.getString("last_bot_port", "8000"));
+		setVideoPort(sharedPref.getString("last_video_port", "8080"));
+		setVideoResolution(sharedPref.getString("last_video_resolution", "320x240"));
+		setVideoFps(sharedPref.getString("last_video_fps", "30"));
 		setBehavior(BEHAVIOR_NONE);
-		setProtocol(PROTOCOL_BT);
+		setProtocol(sharedPref.getInt("last_protocol", PROTOCOL_BT));
 	}
 
 	public void call(String command, HashMap<String, String> params) {

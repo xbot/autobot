@@ -6,14 +6,18 @@ import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.UUID;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.x3f.lib.ToastUtil;
+
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -43,16 +47,28 @@ public class BluetoothActivity extends FragmentActivity implements
 	private ArrayAdapter<String> spinDvcAdp;
 	private BluetoothAdapter btAdapter;
 	private BluetoothDevice btDevice;
+	private SharedPreferences sharedPref;
+	private Editor prefEditor;
 
 	@SuppressLint("HandlerLeak")
 	private Handler mHandler = new Handler() {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 			case MSG_BONDED_DEVICES_FOUND:
+				int position = -1;
+				int idx = 0;
 				Set<BluetoothDevice> devices = btAdapter.getBondedDevices();
 				for (BluetoothDevice device : devices) {
 					spinDvcAdp.add(device.getName());
+					if (device.getAddress().equals(
+							sharedPref.getString("last_bt_device", ""))) {
+						position = idx;
+					} else {
+						idx++;
+					}
 				}
+				if (position >= 0)
+					spinBondedDevices.setSelection(position);
 				break;
 			case MSG_BONDED_DEVICES_NOT_FOUND:
 				ToastUtil.showToast(getApplicationContext(),
@@ -82,6 +98,12 @@ public class BluetoothActivity extends FragmentActivity implements
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_bluetooth);
+
+		sharedPref = getSharedPreferences(AutobotApplication.PREF_FILE_KEY,
+				MODE_PRIVATE);
+		prefEditor = sharedPref.edit();
+		prefEditor.putInt("last_protocol", AutobotApplication.PROTOCOL_BT);
+		prefEditor.commit();
 
 		View btnBTConnect = this.findViewById(R.id.btnBTConnect);
 		btnBTConnect.setOnClickListener(this);
@@ -189,6 +211,10 @@ public class BluetoothActivity extends FragmentActivity implements
 							.createRfcommSocketToServiceRecord(uuid);
 					btSocket.connect();
 					connect(btSocket);
+					
+					// record this device for auto-selection in the future
+					prefEditor.putString("last_bt_device", btDevice.getAddress());
+					prefEditor.commit();
 				} catch (IOException e) {
 					ToastUtil.showToast(getApplicationContext(),
 							getString(R.string.msg_btconnectionfailed));
@@ -252,12 +278,12 @@ public class BluetoothActivity extends FragmentActivity implements
 					getString(R.string.msg_socketnotconnected));
 		}
 	}
-	
+
 	@Override
 	public void onDestroy() {
 		// Disable BT service.
 		btAdapter.disable();
-		
+
 		super.onDestroy();
 	}
 }

@@ -1,16 +1,19 @@
 package org.x3f.autobot;
 
 import java.io.IOException;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
@@ -120,6 +123,9 @@ public class MjpegView extends SurfaceView implements SurfaceHolder.Callback {
 			int height;
 			Paint p = new Paint();
 			Bitmap ovl = null;
+			// TODO 处理旋转
+			Matrix matrix = new Matrix();
+			matrix.postScale(-1f, -1f);
 
 			while (mRun) {
 
@@ -144,7 +150,9 @@ public class MjpegView extends SurfaceView implements SurfaceHolder.Callback {
 						c = mSurfaceHolder.lockCanvas();
 						synchronized (mSurfaceHolder) {
 
-							c.drawBitmap(bmp, null, destRect, p);
+							Bitmap dstbmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(),  
+					                matrix, true);
+							c.drawBitmap(dstbmp, null, destRect, p);
 
 							if (showFps) {
 								p.setXfermode(mode);
@@ -247,6 +255,7 @@ public class MjpegView extends SurfaceView implements SurfaceHolder.Callback {
 				mIn.close();
 			} catch (IOException e) {
 			}
+			freeCameraMemory();
 			mIn = null;
 		}
 

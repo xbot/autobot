@@ -4,7 +4,7 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     >
-    <org.x3f.autobot.MjpegView2
+    <org.x3f.autobot.MjpegView
 		android:id="@+id/mv"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
