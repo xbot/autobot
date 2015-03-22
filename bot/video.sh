@@ -8,11 +8,9 @@ do
     case $arg in
         r)
             RESOLUTION=$OPTARG
-            break
             ;;
         f)
             FPS=$OPTARG
-            break
             ;;
     esac
 done
