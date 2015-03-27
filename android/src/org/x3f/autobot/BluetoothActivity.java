@@ -11,6 +11,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.x3f.lib.ToastUtil;
 
+import com.iflytek.cloud.RecognizerListener;
+import com.iflytek.cloud.RecognizerResult;
+import com.iflytek.cloud.SpeechConstant;
+import com.iflytek.cloud.SpeechError;
+import com.iflytek.cloud.SpeechRecognizer;
+import com.iflytek.cloud.SpeechUtility;
+
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -18,6 +25,7 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -143,7 +151,84 @@ public class BluetoothActivity extends FragmentActivity implements
 
 		});
 		t.start();
+
+		SpeechUtility.createUtility(getApplicationContext(),
+				SpeechConstant.APPID + "=55150092");
+//		// 检查语音+是否安装
+//		// 如未安装,获取语音+下载地址进行下载。安装完成后即可使用服务。
+//		if (!SpeechUtility.getUtility().checkServiceInstalled()) {
+//			String url = SpeechUtility.getUtility().getComponentUrl();
+//			Uri uri = Uri.parse(url);
+//			Intent it = new Intent(Intent.ACTION_VIEW, uri);
+//			startActivity(it);
+//		}
+		
+//		// 1.创建 SpeechRecognizer 对象,需传入初始化监听器
+//		SpeechRecognizer mAsr = SpeechRecognizer.createRecognizer(
+//				getApplicationContext(), mInitListener);
+//		// 2.构建语法(本地识别引擎目前仅支持 BNF 语法),同在线语法识别 请参照 Demo。
+//		// 3.开始识别,设置引擎类型为本地
+//		mAsr.setParameter(SpeechConstant.ENGINE_TYPE, SpeechConstant.TYPE_LOCAL);
+//		// 设置本地识别使用语法 id(此 id 在语法文件中定义)、门限值
+//		mAsr.setParameter(SpeechConstant.LOCAL_GRAMMAR, "call");
+//		mAsr.setParameter(SpeechConstant.MIXED_THRESHOLD, "30");
+//		int ret = mAsr.startListening(mRecoListener);
+//		Log.e(TAG, "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"+String.valueOf(ret));
+		
+		//1.创建SpeechRecognizer对象,第二个参数:本地听写时传InitListener
+		SpeechRecognizer mIat= SpeechRecognizer.createRecognizer(getApplicationContext(), null);
+		//2.设置听写参数,详见《科大讯飞MSC API手册(Android)》SpeechConstant类
+		mIat.setParameter(SpeechConstant.DOMAIN, "iat");
+		mIat.setParameter(SpeechConstant.LANGUAGE, "zh_cn");
+		mIat.setParameter(SpeechConstant.ACCENT, "mandarin ");
+		mIat.setParameter(SpeechConstant.KEY_SPEECH_TIMEOUT, "1000");
+		//3.开始听写
+		mIat.startListening(mRecoListener);
 	}
+
+//	// 初始化监听器,只有在使用本地语音服务时需要监听(即安装讯飞语音+,通过语音+提供本地服务),初始化成功后才可进行本地操作。
+//	private InitListener mInitListener = new InitListener() {
+//		public void onInit(int code) {
+//			if (code == ErrorCode.SUCCESS) {
+//			}
+//		}
+//	};
+
+	private RecognizerListener mRecoListener = new RecognizerListener() {
+		// 听写结果回调接口(返回Json格式结果,用户可参见附录12.1);
+		// 一般情况下会通过onResults接口多次返回结果,完整的识别内容是多次结果的累加;
+		// 关于解析Json的代码可参见MscDemo中JsonParser类;
+		// isLast等于true时会话结束。
+		public void onResult(RecognizerResult results, boolean isLast) {
+			Log.e(TAG, results.getResultString());
+			ToastUtil.showToast(getApplicationContext(), results.getResultString());
+		}
+
+		// 会话发生错误回调接口
+		public void onError(SpeechError error) {
+			Log.e(TAG, error.getPlainDescription(true));
+			ToastUtil.showToast(getApplicationContext(), error.getPlainDescription(true));
+		}
+
+		// 开始录音
+		public void onBeginOfSpeech() {
+			Log.e(TAG, "bbbbbbbbbbbbbbbbbbbbbbb");
+		}
+
+		// 音量值0~30
+		public void onVolumeChanged(int volume) {
+		}
+
+		// 结束录音
+		public void onEndOfSpeech() {
+			Log.e(TAG, "eeeeeeeeeeeeeeeeeeeeeee");
+		}
+
+		// 扩展用接口
+		public void onEvent(int eventType, int arg1, int arg2, Bundle obj) {
+			Log.e(TAG, "sssssssssssssssssss");
+		}
+	};
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -211,9 +296,10 @@ public class BluetoothActivity extends FragmentActivity implements
 							.createRfcommSocketToServiceRecord(uuid);
 					btSocket.connect();
 					connect(btSocket);
-					
+
 					// record this device for auto-selection in the future
-					prefEditor.putString("last_bt_device", btDevice.getAddress());
+					prefEditor.putString("last_bt_device",
+							btDevice.getAddress());
 					prefEditor.commit();
 				} catch (IOException e) {
 					ToastUtil.showToast(getApplicationContext(),
